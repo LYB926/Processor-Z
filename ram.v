@@ -6,10 +6,10 @@ input[8:0]          addr,
 input               wr,
 input[31:0]         wdata,
 input               rd,
-output reg[31:0]    rdata
+output reg[31:0]    rdata = 32'bz
 );
 
-reg[31:0]           ram[255:0];   //RAM
+reg[31:0]           ram[255:0];   //RAM variable
 always @(posedge clock) begin
     if (wr)begin
         ram[addr] <= wdata;       //向RAM中写入数据
@@ -23,6 +23,7 @@ always @(posedge clock) begin
 end
 endmodule
 
+/*
 //-----Testbench of ram-------//
 module ram_tb;
 reg             clock;
@@ -42,23 +43,22 @@ ram ram(
                 rdata
 );
 initial begin
-    clock <= 0; rd <= 0; wr <= 0; wdata <= 0; addr <= 0;
+    clock <= 0; rd <= 0; addr <= 0;
     data_buffer[63:32] = {4'h2, 4'h2, 4'h4, 4'h5, 8'h0, 8'h0}; 
     data_buffer[31:0]  = {4'h1, 4'h0, 4'hf, 4'h0, 4'h0, 4'h0, 4'h1, 4'h0};
     addr_buffer[15:0]  = {8'h0, 8'h1};
-    #10   addr <= addr_buffer[15:8]; wr <= 1; wdata <= data_buffer[63:32];
-    #400  wr <= 0;
-    #500  addr <= addr_buffer[7:0];  wr <= 1; wdata <= data_buffer[31:0];
-    #900  addr <= addr_buffer[15:8]; wr <= 0; wdata <= 0; 
-    #1000 rd <= 1;
-    #1200 rd <= 0; addr <= addr_buffer[7:0];
-    #1500 rd <= 1;
-    #1900 rd <= 0;
-    #2000 $stop; 
+    addr <= addr_buffer[15:8]; wr <= 1; wdata <= data_buffer[63:32];
+
+    #20  addr <= addr_buffer[7:0];  wr <= 1; wdata <= data_buffer[31:0];
+    #20  addr <= addr_buffer[15:8]; wr <= 0; wdata <= 0; rd <= 1;
+    #20  addr <= addr_buffer[7:0]; 
+    #20  rd <= 0; addr <= addr_buffer[15:8];
+    #50  $stop; 
 end
-always #5 clock <= ~clock;
+always #10 clock = ~clock;
 initial begin
     $dumpfile("tb/ram_tb.vcd");
-    $dumpvars(addr, wr, rd, wdata, rdata, addr);
+    $dumpvars();
 end
 endmodule
+*/
