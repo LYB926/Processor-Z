@@ -54,7 +54,7 @@ initial begin
     #1200 rd <= 0; addr <= addr_buffer[7:0];
     #1500 rd <= 1;
     #1900 rd <= 0;
-    #2000 $stop;
+    #2000 $stop; 
 end
 always #5 clock <= ~clock;
 initial begin
