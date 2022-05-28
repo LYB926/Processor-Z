@@ -1,0 +1,60 @@
+$date
+	Sat May 28 13:19:52 2022
+$end
+$version
+	Icarus Verilog
+$end
+$timescale
+	10ps
+$end
+$scope module ram_tb $end
+$var reg 1 ! wr $end
+$upscope $end
+$scope module ram_tb $end
+$var reg 1 " rd $end
+$upscope $end
+$scope module ram_tb $end
+$var reg 32 # wdata [31:0] $end
+$upscope $end
+$scope module ram_tb $end
+$var wire 32 $ rdata [31:0] $end
+$upscope $end
+$scope module ram_tb $end
+$var reg 9 % addr [8:0] $end
+$upscope $end
+$enddefinitions $end
+#0
+$dumpvars
+b0 %
+bz $
+b0 #
+0"
+0!
+$end
+#1000
+b100010010001010000000000000000 #
+1!
+#41000
+0!
+#91000
+b10000111100000000000000010000 #
+1!
+b1 %
+#181000
+b0 #
+b0 %
+0!
+#281000
+b100010010001010000000000000000 $
+1"
+#401000
+bz $
+b1 %
+0"
+#551000
+b10000111100000000000000010000 $
+1"
+#741000
+bz $
+0"
+#941000
