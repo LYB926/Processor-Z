@@ -9,8 +9,8 @@ input               rd,
 output reg[31:0]    rdata
 );
 
-reg[31:0]           ram[127:0];   //RAM
-always @(negedge clock) begin
+reg[31:0]           ram[255:0];   //RAM
+always @(posedge clock) begin
     if (wr)begin
         ram[addr] <= wdata;       //向RAM中写入数据
     end
