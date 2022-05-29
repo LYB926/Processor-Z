@@ -5,8 +5,12 @@ input[3:0]          dstE,
 input[31:0]         valE,
 input[3:0]          dstM,
 input[31:0]         valM,
+input[3:0]          rA,
+input[3:0]          rB,
 input               reset,
 input               clock,
+output[31:0]        valA,
+output[31:0]        valB,
 output[31:0]        r0,
 output[31:0]        r1,
 output[31:0]        r2,
@@ -17,9 +21,11 @@ output[31:0]        r6,
 output[31:0]        r7
 );
 reg[31:0]           r0, r1, r2, r3, r4, r5,r6, r7;
+reg[31:0]           valA, valB;
 
 always @(posedge clock or negedge reset) begin
     if (reset)begin
+        valA <= 0; valB <= 0;
         r0 <= 0; r1 <= 0; r2 <= 0; r3 <= 0; 
         r4 <= 0; r5 <= 0; r6 <= 0; r7 <= 0; 
     end
@@ -43,7 +49,29 @@ always @(posedge clock or negedge reset) begin
             5: begin r5 <= valM; end
             6: begin r6 <= valM; end
             7: begin r7 <= valM; end
-        endcase        
+        endcase
+        case(rA)
+            0: begin valA <= r0; end
+            1: begin valA <= r1; end
+            2: begin valA <= r2; end
+            3: begin valA <= r3; end
+            4: begin valA <= r4; end
+            5: begin valA <= r5; end
+            6: begin valA <= r6; end
+            7: begin valA <= r7; end
+            default: begin valA <= 32'bz; end
+        endcase
+        case(rB)
+            0: begin valB <= r0; end
+            1: begin valB <= r1; end
+            2: begin valB <= r2; end
+            3: begin valB <= r3; end
+            4: begin valB <= r4; end
+            5: begin valB <= r5; end
+            6: begin valB <= r6; end
+            7: begin valB <= r7; end
+            default: begin valB <= 32'bz; end
+        endcase   
     end
 end
 endmodule

@@ -11,6 +11,7 @@ output[3:0]     ifun,
 output[3:0]     rA,
 output[3:0]     rB,
 output[15:0]    valC,
+//output[15:0]    valD, /////////
 output[31:0]    r0,
 output[31:0]    r1,
 output[31:0]    r2,
@@ -18,7 +19,9 @@ output[31:0]    r3,
 output[31:0]    r4,
 output[31:0]    r5,
 output[31:0]    r6,
-output[31:0]    r7
+output[31:0]    r7,
+output[31:0]    valA,
+output[31:0]    valB
 );
 
 //wire            read = 0;
@@ -29,7 +32,7 @@ output[31:0]    r7
 //assign rA    = read_buffer[23:20];
 //assign rB    = read_buffer[19:16];
 //assign valC  = read_buffer[15: 0];
-
+reg[15:0]       valC;
 wire[8:0]       addr_w;
 wire[31:0]      read_w;
 reg[8:0]        PC = 0;
@@ -41,7 +44,7 @@ assign icode  = read_w[31:28];
 assign ifun   = read_w[27:24];
 assign rA     = read_w[23:20];
 assign rB     = read_w[19:16];
-assign valC   = read_w[15: 0];
+//assign valC   = read_w[15: 0];
 assign addr_w = (working) ? PC : addr;
 //assign read   = (working) ? 1  : 0;
 
@@ -58,6 +61,8 @@ regfile regfile(
                 .valE(),
                 .dstM(dstM),
                 .valM(valM),
+                .rA(rA),
+                .rB(rB),
                 .reset(reg_rst),
                 .clock(clock),
                 .r0(r0),
@@ -67,7 +72,9 @@ regfile regfile(
                 .r4(r4),
                 .r5(r5),
                 .r6(r6),
-                .r7(r7)
+                .r7(r7),
+                .valA(valA),
+                .valB(valB)
 );
 initial begin
         reg_rst <= 1;
@@ -80,6 +87,7 @@ always @(posedge clock) begin
         //read_buffer <= read_w;
         read = 1; 
         PC <= PC+1;
+        valC <= read_w[15: 0];//////////
         if (read_w[31:24] == 8'h10)begin
             dstM <= read_w[19:16];
             valM <= read_w[15: 0];
@@ -106,7 +114,9 @@ wire[3:0]       icode;
 wire[3:0]       ifun;
 wire[3:0]       rA;
 wire[3:0]       rB;
-wire[15:0]      valC; 
+wire[15:0]      valC;
+//wire[15:0]      valD;/////////
+wire[31:0]      valB, valA; 
 wire[31:0]      r0, r1, r2, r3, r4, r5, r6, r7;
 processor processor(
                 clock,
@@ -119,7 +129,9 @@ processor processor(
                 rA,
                 rB,
                 valC,
-                r0, r1, r2, r3, r4, r5, r6, r7
+                r0, r1, r2, r3, r4, r5, r6, r7,
+                valA,
+                valB
 );
 initial begin
     clock <= 0; addr <= 0; wr <= 0; wdata <= 0; working <= 0;
@@ -131,13 +143,17 @@ initial begin
     #20         addr <= 5; wr <= 1; wdata <= 32'h10F50085;
     #20         addr <= 6; wr <= 1; wdata <= 32'h10F60086;
     #20         addr <= 7; wr <= 1; wdata <= 32'h10F70087;
+    #20         addr <= 8; wr <= 1; wdata <= 32'h20010000;
+    #20         addr <= 9; wr <= 1; wdata <= 32'h21230000;
+    #20         addr <= 10;wr <= 1; wdata <= 32'h22450000;
+    #20         addr <= 11;wr <= 1; wdata <= 32'h23670000;
     #20         addr <= 0; wr <= 0; wdata <= 0;
     #10         working <= 1;
-    #300        $stop;
+    #500        $stop;
 end
 always #10 clock = ~clock;
 initial begin
-    $dumpfile("tb/pro_tb2.vcd");
+    $dumpfile("pro_tb3.vcd");
     $dumpvars();
 end
 endmodule
