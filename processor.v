@@ -10,22 +10,33 @@ output[3:0]     icode,
 output[3:0]     ifun,
 output[3:0]     rA,
 output[3:0]     rB,
-output[15:0]    valC
+output[15:0]    valC,
+output[31:0]    r0,
+output[31:0]    r1,
+output[31:0]    r2,
+output[31:0]    r3,
+output[31:0]    r4,
+output[31:0]    r5,
+output[31:0]    r6,
+output[31:0]    r7
 );
 
-reg[8:0]        PC = 0;
-reg             read = 0; //3
 //wire            read = 0;
-wire[8:0]       addr_w;
-wire[31:0]      read_w;
-reg[8:0]        addr_buffer;
-reg[31:0]       read_buffer = 0;
-
+//reg[8:0]       addr_buffer;
+//reg[31:0]      read_buffer = 0;
 //assign icode = read_buffer[31:28];
 //assign ifun  = read_buffer[27:24];
 //assign rA    = read_buffer[23:20];
 //assign rB    = read_buffer[19:16];
 //assign valC  = read_buffer[15: 0];
+
+wire[8:0]       addr_w;
+wire[31:0]      read_w;
+reg[8:0]        PC = 0;
+reg             read = 0; //3
+reg[3:0]        dstM = 0;
+reg[31:0]       valM = 0;
+reg             reg_rst;
 assign icode  = read_w[31:28];
 assign ifun   = read_w[27:24];
 assign rA     = read_w[23:20];
@@ -33,6 +44,7 @@ assign rB     = read_w[19:16];
 assign valC   = read_w[15: 0];
 assign addr_w = (working) ? PC : addr;
 //assign read   = (working) ? 1  : 0;
+
 ram ram(
                 .clock(clock),
                 .addr(addr_w),
@@ -41,12 +53,37 @@ ram ram(
                 .rd(read),
                 .rdata(read_w)
 );
+regfile regfile(
+                .dstE(),
+                .valE(),
+                .dstM(dstM),
+                .valM(valM),
+                .reset(reg_rst),
+                .clock(clock),
+                .r0(r0),
+                .r1(r1),
+                .r2(r2),
+                .r3(r3),
+                .r4(r4),
+                .r5(r5),
+                .r6(r6),
+                .r7(r7)
+);
+initial begin
+        reg_rst <= 1;
+    #20 reg_rst <= 0;
+end
+
 always @(posedge clock) begin
     if(working)begin
-        read = 1; //
         //addr_w <= PC;
         //read_buffer <= read_w;
+        read = 1; 
         PC <= PC+1;
+        if (read_w[31:24] == 8'h10)begin
+            dstM <= read_w[19:16];
+            valM <= read_w[15: 0];
+        end
     end
     else begin
         if (wr)begin
@@ -59,7 +96,53 @@ always @(posedge clock) begin
 end
 endmodule
 
-//-----Testbench of processor-------//
+module pro_tb2;
+reg             clock;
+reg[8:0]        addr;
+reg             wr;
+reg[31:0]       wdata;
+reg             working;
+wire[3:0]       icode;
+wire[3:0]       ifun;
+wire[3:0]       rA;
+wire[3:0]       rB;
+wire[15:0]      valC; 
+wire[31:0]      r0, r1, r2, r3, r4, r5, r6, r7;
+processor processor(
+                clock,
+                addr,
+                wr,
+                wdata,
+                working,
+                icode,
+                ifun,
+                rA,
+                rB,
+                valC,
+                r0, r1, r2, r3, r4, r5, r6, r7
+);
+initial begin
+    clock <= 0; addr <= 0; wr <= 0; wdata <= 0; working <= 0;
+    #20         addr <= 0; wr <= 1; wdata <= 32'h10F00080;
+    #20         addr <= 1; wr <= 1; wdata <= 32'h10F10081;
+    #20         addr <= 2; wr <= 1; wdata <= 32'h10F20082;
+    #20         addr <= 3; wr <= 1; wdata <= 32'h10F30083;
+    #20         addr <= 4; wr <= 1; wdata <= 32'h10F40084;
+    #20         addr <= 5; wr <= 1; wdata <= 32'h10F50085;
+    #20         addr <= 6; wr <= 1; wdata <= 32'h10F60086;
+    #20         addr <= 7; wr <= 1; wdata <= 32'h10F70087;
+    #20         addr <= 0; wr <= 0; wdata <= 0;
+    #10         working <= 1;
+    #300        $stop;
+end
+always #10 clock = ~clock;
+initial begin
+    $dumpfile("tb/pro_tb2.vcd");
+    $dumpvars();
+end
+endmodule
+
+/*-----Testbench of processor (Task 1)-------//
 module pro_tb;
 reg             clock;
 reg[8:0]        addr;
@@ -92,11 +175,11 @@ initial begin
     #20         addr <= 4; wdata <= 32'h23670000;
     #20         addr <= 0; wdata <= 32'h00000000; wr <= 0; working <= 1;
     //#20         working <= 1;
-    #160        $stop;
+    #100        $stop;
 end
 always #10 clock = ~clock;
 initial begin
     $dumpfile("tb/pro_tb.vcd");
     $dumpvars;
 end
-endmodule
+endmodule*/
