@@ -109,7 +109,7 @@ always @(posedge clock) begin
     end
 end
 initial begin
-    $dumpfile("regfile.vcd");
+    $dumpfile("regfile_tb.vcd");
     $dumpvars;
 end
 endmodule
