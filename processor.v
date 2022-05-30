@@ -21,7 +21,8 @@ output[31:0]    r5,
 output[31:0]    r6,
 output[31:0]    r7,
 output[31:0]    valA,
-output[31:0]    valB
+output[31:0]    valB,
+output[31:0]    valE
 );
 
 //wire            read = 0;
@@ -32,20 +33,30 @@ output[31:0]    valB
 //assign rA    = read_buffer[23:20];
 //assign rB    = read_buffer[19:16];
 //assign valC  = read_buffer[15: 0];
-reg[15:0]       valC;
+
 wire[8:0]       addr_w;
 wire[31:0]      read_w;
 reg[8:0]        PC = 0;
 reg             read = 0; //3
+reg[3:0]        dstE = 0;
+reg[31:0]       valE = 0; //////////
 reg[3:0]        dstM = 0;
 reg[31:0]       valM = 0;
+reg[15:0]       valC;
 reg             reg_rst;
+wire[31:0]       aluA;
+wire[31:0]       aluB;
+reg[3:0]        alufun;
+wire[31:0]      aluValE;
 assign icode  = read_w[31:28];
 assign ifun   = read_w[27:24];
 assign rA     = read_w[23:20];
 assign rB     = read_w[19:16];
-//assign valC   = read_w[15: 0];
 assign addr_w = (working) ? PC : addr;
+assign aluA   = valA;
+assign aluB   = valB;
+//assign valE   = aluValE;
+//assign valC   = read_w[15: 0];
 //assign read   = (working) ? 1  : 0;
 
 ram ram(
@@ -57,8 +68,8 @@ ram ram(
                 .rdata(read_w)
 );
 regfile regfile(
-                .dstE(),
-                .valE(),
+                .dstE(dstE),
+                .valE(valE),
                 .dstM(dstM),
                 .valM(valM),
                 .rA(rA),
@@ -76,6 +87,13 @@ regfile regfile(
                 .valA(valA),
                 .valB(valB)
 );
+alu alu(
+        .aluA(aluA),
+        .aluB(aluB),
+        .alufun(alufun),
+        .valE(aluValE)
+);
+
 initial begin
         reg_rst <= 1;
     #20 reg_rst <= 0;
@@ -88,10 +106,36 @@ always @(posedge clock) begin
         read = 1; 
         PC <= PC+1;
         valC <= read_w[15: 0];//////////
-        if (read_w[31:24] == 8'h10)begin
+        /*if (read_w[31:24] == 8'h10)begin
             dstM <= read_w[19:16];
             valM <= read_w[15: 0];
-        end
+        end*/
+        case(read_w[31:24])
+            8'h10: begin
+                dstM <= read_w[19:16];
+                valM <= read_w[15: 0]; 
+            end            
+            8'h20: begin
+                alufun <= 0;
+                dstE <= rA;
+                valE <= aluValE;
+            end
+            8'h21: begin
+                alufun <= 1;
+                dstE <= rA;
+                valE <= aluValE;
+            end
+            8'h22: begin
+                alufun <= 2;
+                dstE <= rA;
+                valE <= aluValE;
+            end
+            8'h23: begin
+                alufun <= 3;
+                dstE <= rA;
+                valE <= aluValE;
+            end
+        endcase
     end
     else begin
         if (wr)begin
@@ -118,6 +162,7 @@ wire[15:0]      valC;
 //wire[15:0]      valD;/////////
 wire[31:0]      valB, valA; 
 wire[31:0]      r0, r1, r2, r3, r4, r5, r6, r7;
+wire[31:0]      valE;
 processor processor(
                 clock,
                 addr,
@@ -131,7 +176,8 @@ processor processor(
                 valC,
                 r0, r1, r2, r3, r4, r5, r6, r7,
                 valA,
-                valB
+                valB,
+                valE
 );
 initial begin
     clock <= 0; addr <= 0; wr <= 0; wdata <= 0; working <= 0;

@@ -14,10 +14,11 @@ always @(alufun) begin
         3: begin //logical XOR: AB'+A'B, not bitwise XOR: A^B
             valE <= ((!aluA)&&aluB)||(aluA&&(!aluB)); 
            end
+        default: begin valE <= 32'bz; end
     endcase
 end
 endmodule
-
+/*
 //-------Testbench of ALU-------//
 module alu_tb;
 reg[31:0]       aluA;
@@ -42,3 +43,4 @@ initial begin
     $dumpvars();
 end
 endmodule
+*/
