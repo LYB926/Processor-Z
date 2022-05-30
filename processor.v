@@ -1,4 +1,4 @@
-//处理器Z的顶层文件processor.v
+//处理器Z的顶层文件 processor.v
 `timescale 1ns/10ps
 module processor(
 input           clock,
@@ -38,14 +38,17 @@ wire[8:0]       addr_w;
 wire[31:0]      read_w;
 reg[8:0]        PC = 0;
 reg             read = 0; //3
-reg[3:0]        dstE = 0;
-reg[31:0]       valE = 0; //////////
+   /* I don't know why, 
+    * but it only works fine 
+    * when the initial value
+    * of dstE_reg is 15. ↓  */
+reg[3:0]        dstE_reg = 4'hF;
 reg[3:0]        dstM = 0;
 reg[31:0]       valM = 0;
 reg[15:0]       valC;
 reg             reg_rst;
-wire[31:0]       aluA;
-wire[31:0]       aluB;
+wire[31:0]      aluA;
+wire[31:0]      aluB;
 reg[3:0]        alufun;
 wire[31:0]      aluValE;
 assign icode  = read_w[31:28];
@@ -55,7 +58,8 @@ assign rB     = read_w[19:16];
 assign addr_w = (working) ? PC : addr;
 assign aluA   = valA;
 assign aluB   = valB;
-//assign valE   = aluValE;
+assign valE   = aluValE;
+//assign valE_reg = valE;
 //assign valC   = read_w[15: 0];
 //assign read   = (working) ? 1  : 0;
 
@@ -68,8 +72,8 @@ ram ram(
                 .rdata(read_w)
 );
 regfile regfile(
-                .dstE(dstE),
-                .valE(valE),
+                .dstE(dstE_reg),
+                .valE(aluValE),
                 .dstM(dstM),
                 .valM(valM),
                 .rA(rA),
@@ -117,23 +121,23 @@ always @(posedge clock) begin
             end            
             8'h20: begin
                 alufun <= 0;
-                dstE <= rA;
-                valE <= aluValE;
+                dstE_reg <= rA;
+                //valE_reg <= valE;
             end
             8'h21: begin
                 alufun <= 1;
-                dstE <= rA;
-                valE <= aluValE;
+                dstE_reg <= rA;
+                //valE_reg <= valE;
             end
             8'h22: begin
                 alufun <= 2;
-                dstE <= rA;
-                valE <= aluValE;
+                dstE_reg <= rA;
+               //valE_reg <= valE;
             end
             8'h23: begin
                 alufun <= 3;
-                dstE <= rA;
-                valE <= aluValE;
+                dstE_reg <= rA;
+               //valE_reg <= valE;
             end
         endcase
     end
@@ -199,7 +203,7 @@ initial begin
 end
 always #10 clock = ~clock;
 initial begin
-    $dumpfile("pro_tb3.vcd");
+    $dumpfile("tb/pro_tb4.vcd");
     $dumpvars();
 end
 endmodule
