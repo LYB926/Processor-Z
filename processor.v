@@ -10,6 +10,95 @@ output[3:0]     icode,
 output[3:0]     ifun,
 output[3:0]     rA,
 output[3:0]     rB,
+output[15:0]    valC
+);
+ram ram(
+                .clock(clock),
+                .addr(addr_w),
+                .wr(wr),
+                .wdata(wdata),
+                .rd(rd),
+                .rdata(rdata)
+);
+//-----Fetch stage signals-----//
+reg[8:0]        PC = 0;
+wire[8:0]       addr_w;
+wire            rd;
+wire[31:0]      rdata;
+wire[31:0]      F_read;
+//-----------Fetch-------------//
+assign addr_w = (working) ? PC   : addr;
+assign rd     = (working) ? 1    : 0;
+assign F_read = rdata;
+always @(posedge clock) begin
+    if (working)begin
+        PC <= PC + 1;
+    end
+end
+//-------Decoding------//
+assign icode  = F_read[31:28];
+assign ifun   = F_read[27:24];
+assign rA     = F_read[23:20];
+assign rB     = F_read[19:16];
+assign valC   = F_read[15: 0];
+endmodule
+
+
+
+
+
+//-----Testbench of processor (Task 1)-------//
+module pro_tb;
+reg             clock;
+reg[8:0]        addr;
+reg             wr;
+reg[31:0]       wdata;
+reg             working;
+wire[3:0]       icode;
+wire[3:0]       ifun;
+wire[3:0]       rA;
+wire[3:0]       rB;
+wire[15:0]      valC; 
+processor processor(
+                clock,
+                addr,
+                wr,
+                wdata,
+                working,
+                icode,
+                ifun,
+                rA,
+                rB,
+                valC
+);
+initial begin
+    clock <= 0; addr <= 0; wdata <= 32'h00000000; wr <= 0; working <= 0;
+    #20         addr <= 0; wdata <= 32'h10f00010; wr <= 1;
+    #20         addr <= 1; wdata <= 32'h20010000;
+    #20         addr <= 2; wdata <= 32'h21230000;
+    #20         addr <= 3; wdata <= 32'h22450000;
+    #20         addr <= 4; wdata <= 32'h23670000;
+    #20         addr <= 0; wdata <= 32'h00000000; wr <= 0; working <= 1;
+    //#20         working <= 1;
+    #150        $stop;
+end
+always #10 clock = ~clock;
+initial begin
+    $dumpfile("pro_tb.vcd");
+    $dumpvars;
+end
+endmodule
+
+/*module processor(
+input           clock,
+input[8:0]      addr,
+input           wr,
+input[31:0]     wdata,
+input           working,
+output[3:0]     icode,
+output[3:0]     ifun,
+output[3:0]     rA,
+output[3:0]     rB,
 output[15:0]    valC,
 //output[15:0]    valD, /////////
 output[31:0]    r0,
@@ -38,10 +127,6 @@ wire[8:0]       addr_w;
 wire[31:0]      read_w;
 reg[8:0]        PC = 0;
 reg             read = 0; //3
-   /* I don't know why, 
-    * but it only works fine 
-    * when the initial value
-    * of dstE_reg is 15. ↓  */
 reg[3:0]        dstE_reg = 4'hF;
 reg[3:0]        dstM = 0;
 reg[31:0]       valM = 0;
@@ -51,10 +136,17 @@ wire[31:0]      aluA;
 wire[31:0]      aluB;
 reg[3:0]        alufun;
 wire[31:0]      aluValE;
-assign icode  = read_w[31:28];
-assign ifun   = read_w[27:24];
-assign rA     = read_w[23:20];
-assign rB     = read_w[19:16];
+// Separate instruction fetching and decoding
+// adding a pipeline
+reg[3:0]        icode;
+reg[3:0]        ifun;
+reg[3:0]        rA;
+reg[3:0]        rB;
+//assign icode  = read_w[31:28];
+//assign ifun   = read_w[27:24];
+//assign rA     = read_w[23:20];
+//assign rB     = read_w[19:16];
+//
 assign addr_w = (working) ? PC : addr;
 assign aluA   = valA;
 assign aluB   = valB;
@@ -109,11 +201,11 @@ always @(posedge clock) begin
         //read_buffer <= read_w;
         read = 1; 
         PC <= PC+1;
-        valC <= read_w[15: 0];//////////
-        /*if (read_w[31:24] == 8'h10)begin
-            dstM <= read_w[19:16];
-            valM <= read_w[15: 0];
-        end*/
+        icode <= read_w[31:28];
+        ifun  <= read_w[27:24];
+        valC  <= read_w[15: 0];//////////
+        rA    <= read_w[23:20];
+        rB    <= read_w[19:16];
         case(read_w[31:24])
             8'h10: begin
                 dstM <= read_w[19:16];
@@ -207,7 +299,7 @@ initial begin
     $dumpvars();
 end
 endmodule
-
+*/
 /*-----Testbench of processor (Task 1)-------//
 module pro_tb;
 reg             clock;
