@@ -1,5 +1,5 @@
 # Processor-Z
-使用 Verilog 实现一个比 Y86-64 更简单的处理器，简称为 Processor-Z ~~("The Z Makes It Sound Cool”)~~。
+使用 Verilog 实现一个比 Y86-64 更简单的处理器，简称为 Processor-Z  ~~("The Z Makes It Sound Cool”)~~。
 
 
 使用`VS Code`、`Icarus Verilog`和`GTKWave`的开源解决方案进行`Testbench`仿真。
