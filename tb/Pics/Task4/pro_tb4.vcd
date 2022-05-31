@@ -1,5 +1,5 @@
 $date
-	Tue May 31 18:16:31 2022
+	Tue May 31 18:39:26 2022
 $end
 $version
 	Icarus Verilog
@@ -7,7 +7,7 @@ $end
 $timescale
 	10ps
 $end
-$scope module pro_tb2 $end
+$scope module pro_tb4 $end
 $var wire 32 ! valE [31:0] $end
 $var wire 32 " r7 [31:0] $end
 $var wire 32 # r6 [31:0] $end
@@ -54,8 +54,8 @@ $var reg 4 G D_rB [3:0] $end
 $var reg 32 H D_valA [31:0] $end
 $var reg 32 I D_valB [31:0] $end
 $var reg 16 J D_valC [15:0] $end
-$var reg 4 K E_dstM [3:0] $end
-$var reg 4 L E_rA [3:0] $end
+$var reg 4 K E_dstE [3:0] $end
+$var reg 4 L E_dstM [3:0] $end
 $var reg 32 M E_valE [31:0] $end
 $var reg 32 N E_valM [31:0] $end
 $var reg 9 O PC [8:0] $end
@@ -454,9 +454,9 @@ b1 d
 #35000
 b100 C
 b100 ^
-b1111 L
+b1111 K
 b10000000 N
-b0 K
+b0 L
 b10000001 J
 b1 G
 b10000010 T
@@ -482,7 +482,7 @@ b10000011 T
 b11 S
 b11 d
 b10000001 N
-b1 K
+b1 L
 b1111 V
 b1111 a
 b10000000 Y
@@ -500,7 +500,7 @@ b10000001 f
 b1 W
 b1 b
 b10000010 N
-b10 K
+b10 L
 b10000011 J
 b11 G
 b10000100 T
@@ -530,7 +530,7 @@ b10000101 T
 b101 S
 b101 d
 b10000011 N
-b11 K
+b11 L
 b10000010 Y
 b10000010 f
 b10 W
@@ -550,7 +550,7 @@ b10000011 f
 b11 W
 b11 b
 b10000100 N
-b100 K
+b100 L
 b10000101 J
 b101 G
 b10000110 T
@@ -580,7 +580,7 @@ b10000111 T
 b111 S
 b111 d
 b10000101 N
-b101 K
+b101 L
 b10000100 Y
 b10000100 f
 b100 W
@@ -604,7 +604,7 @@ b10000101 f
 b101 W
 b101 b
 b10000110 N
-b110 K
+b110 L
 b10000111 J
 b111 G
 b0 T
@@ -657,7 +657,7 @@ b10 R
 b10 c
 b1 Q
 b10000111 N
-b111 K
+b111 L
 b10000110 Y
 b10000110 f
 b110 W
@@ -687,7 +687,7 @@ b10000111 f
 b111 W
 b111 b
 b100000001 M
-b0 L
+b0 K
 b10000011 2
 b10000011 I
 b10000011 [
@@ -745,7 +745,7 @@ b110 R
 b110 c
 b11 Q
 b11111111111111111111111111111111 M
-b10 L
+b10 K
 b100000001 X
 b100000001 e
 b0 V
@@ -775,7 +775,7 @@ b11111111111111111111111111111111 e
 b10 V
 b10 a
 b1 M
-b100 L
+b100 K
 b10000111 2
 b10000111 I
 b10000111 [
@@ -822,7 +822,7 @@ bx F
 bx E
 bx D
 b0 M
-b110 L
+b110 K
 b1 X
 b1 e
 b100 V
@@ -842,7 +842,7 @@ b0 e
 b110 V
 b110 a
 bx M
-bx L
+bx K
 b10000 O
 b1 %
 b1 :

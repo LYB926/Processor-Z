@@ -128,7 +128,7 @@ wire[31:0]        e_valA = 32'bz;
 wire[31:0]        e_valB = 32'bz;
 wire[3:0]         e_alufun = 4'bz;
 wire[31:0]        e_valE = 32'bz;
-reg[3:0]          E_rA    = 4'bz;
+reg[3:0]          E_dstE = 4'bz;
 reg[31:0]         E_valE = 32'bz;
 initial begin
         e_reg_rst <= 1;
@@ -148,9 +148,10 @@ always @(posedge clock) begin
         E_dstM <= D_rB;
         E_valM <= D_valC;
     end
-    E_rA   <= D_rA;
+    E_dstE <= D_rA;
     E_valE <= e_valE;
 end
+
 //----Write-back stage signals----//
 reg[3:0]          w_dstM = 4'bz;
 reg[31:0]         w_valM = 32'bz;
@@ -160,12 +161,13 @@ reg[31:0]         w_valE = 32'bz;
 always @(posedge clock) begin
         w_dstM <= E_dstM;
         w_valM <= E_valM;
-        w_dstE <= E_rA;
+        w_dstE <= E_dstE;
         w_valE <= E_valE;
 end
-
 endmodule
 
+
+//-----Testbench of processor-----//
 module pro_tb4;
 reg             clock;
 reg[8:0]        addr;
@@ -180,7 +182,6 @@ wire[31:0]      r0, r1, r2, r3, r4, r5, r6, r7;
 //wire[3:0]       rA;
 //wire[3:0]       rB;
 //wire[15:0]      valC;
-
 //wire[31:0]      valE;
 processor processor(
                 clock,
