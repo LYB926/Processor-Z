@@ -37,8 +37,8 @@ ram ram(
                 .rdata(rdata)
 );
 regfile regfile(
-                .dstE(),
-                .valE(),
+                .dstE(w_dstE),
+                .valE(w_valE),
                 .dstM(w_dstM),
                 .valM(w_valM),
                 .rA(d_rA),
@@ -166,8 +166,7 @@ end
 
 endmodule
 
-
-module pro_tb2;
+module pro_tb4;
 reg             clock;
 reg[8:0]        addr;
 reg             wr;
@@ -220,7 +219,7 @@ initial begin
 end
 always #10 clock = ~clock;
 initial begin
-    $dumpfile("pro_tb4.vcd");
+    $dumpfile("tb/pro_tb4.vcd");
     $dumpvars();
 end
 endmodule
