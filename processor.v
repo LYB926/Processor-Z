@@ -6,7 +6,7 @@ input[8:0]      addr,
 input           wr,
 input[31:0]     wdata,
 input           working,
-//input[3:0]      rID,
+input[3:0]      rID,
 //output[31:0]    valA,
 //output[31:0]    valB,
 output[31:0]    valE,
@@ -17,8 +17,8 @@ output[31:0]    r3,
 output[31:0]    r4,
 output[31:0]    r5,
 output[31:0]    r6,
-output[31:0]    r7
-//output[31:0]    rdata
+output[31:0]    r7,
+output[31:0]    rdata
 //output[3:0]     icode,
 //output[3:0]     ifun,
 //output[3:0]     rA,
@@ -163,14 +163,14 @@ reg[3:0]          w_dstM = 4'bz;
 reg[31:0]         w_valM = 32'bz;
 reg[3:0]          w_dstE = 4'bz;
 reg[31:0]         w_valE = 32'bz;
-/*assign            rdata  = (rID == 0) ? r0 :
+assign            rdata  = (rID == 0) ? r0 :
                            (rID == 1) ? r1 :
                            (rID == 2) ? r2 :
                            (rID == 3) ? r3 :
                            (rID == 4) ? r4 :
                            (rID == 5) ? r5 :
                            (rID == 6) ? r6 :
-                           (rID == 7) ? r7 : 32'bz;*/
+                           (rID == 7) ? r7 : 32'bz;
 //-----------Write-back-----------//
 always @(posedge clock) begin
         w_dstM <= E_dstM;
@@ -179,7 +179,7 @@ always @(posedge clock) begin
         w_valE <= E_valE;
 end
 endmodule
-/*
+
 //-----Testbench of processor(Task 5)-----//
 module pro_tb4;
 reg             clock;
@@ -249,8 +249,8 @@ initial begin
     $dumpvars();
 end
 endmodule
-*/
 
+/*
 //-----Testbench of processor-----//
 module pro_tb4;
 reg             clock;
@@ -312,7 +312,7 @@ initial begin
     $dumpvars();
 end
 endmodule
-
+*/
 
 /*
 //-----Testbench of processor (Task 1)-------//
