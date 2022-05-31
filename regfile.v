@@ -85,7 +85,7 @@ always @(posedge clock or negedge reset) begin
 end
 endmodule
 
-
+/*
 module regfile_tb;
 reg[3:0]          dstE;
 reg[3:0]          dstM;
@@ -150,4 +150,4 @@ initial begin
     $dumpfile("regfile_tb.vcd");
     $dumpvars;
 end
-endmodule
+endmodule*/
