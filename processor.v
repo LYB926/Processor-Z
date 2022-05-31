@@ -6,6 +6,8 @@ input[8:0]      addr,
 input           wr,
 input[31:0]     wdata,
 input           working,
+output[31:0]    valA,
+output[31:0]    valB,
 output[31:0]    r0,
 output[31:0]    r1,
 output[31:0]    r2,
@@ -34,8 +36,12 @@ regfile regfile(
                 .valE(),
                 .dstM(w_dstM),
                 .valM(w_valM),
+                .rA(d_rA),
+                .rB(d_rB),
                 .reset(e_reg_rst),
                 .clock(clock),
+                .valA(d_valA),
+                .valB(d_valB),
                 .r0(r0),
                 .r1(r1),
                 .r2(r2),
@@ -62,17 +68,25 @@ always @(posedge clock) begin
 end
 
 //------Decode stage signals-----//
-reg[3:0]        D_icode = 32'bz;
-reg[3:0]        D_ifun  = 32'bz;
-reg[3:0]        D_rA    = 32'bz;
-reg[3:0]        D_rB    = 32'bz;
-reg[15:0]       D_valC  = 32'bz;
+reg[3:0]        D_icode = 4'bz;
+reg[3:0]        D_ifun  = 4'bz;
+reg[3:0]        D_rA    = 4'bz;
+reg[3:0]        D_rB    = 4'bz;
+reg[15:0]       D_valC  = 16'bz;
+wire[31:0]      d_valA  = 32'bz;
+wire[31:0]      d_valB  = 32'bz;
+wire[3:0]       d_rA    = 4'bz;
+wire[3:0]       d_rB    = 4'bz;
 //-------------Decode------------//
 //assign icode  = D_icode;
 //assign ifun   = D_ifun;
 //assign rA     = D_rB;
 //assign rB     = D_rB;
 //assign valC   = D_valC;
+assign valA     = d_valA;
+assign valB     = d_valB;
+assign d_rA     = D_rA;
+assign d_rB     = D_rB;         
 always @(posedge clock) begin
     if (working)begin
         D_icode <= F_read[31:28];
@@ -118,13 +132,14 @@ reg[8:0]        addr;
 reg             wr;
 reg[31:0]       wdata;
 reg             working;
+wire[31:0]      valA, valB; 
 wire[31:0]      r0, r1, r2, r3, r4, r5, r6, r7;
 //wire[3:0]       icode;
 //wire[3:0]       ifun;
 //wire[3:0]       rA;
-////wire[3:0]       rB;
+//wire[3:0]       rB;
 //wire[15:0]      valC;
-//wire[31:0]      valB, valA; 
+
 //wire[31:0]      valE;
 processor processor(
                 clock,
@@ -137,9 +152,9 @@ processor processor(
                 //rA,
                 //rB,
                 //valC,
+                valA,
+                valB,
                 r0, r1, r2, r3, r4, r5, r6, r7
-                //valA,
-                //valB,
                 //valE
 );
 initial begin
@@ -152,17 +167,17 @@ initial begin
     #20         addr <= 5; wr <= 1; wdata <= 32'h10F50085;
     #20         addr <= 6; wr <= 1; wdata <= 32'h10F60086;
     #20         addr <= 7; wr <= 1; wdata <= 32'h10F70087;
-    //#20         addr <= 8; wr <= 1; wdata <= 32'h20010000;
-    //#20         addr <= 9; wr <= 1; wdata <= 32'h21230000;
-    //#20         addr <= 10;wr <= 1; wdata <= 32'h22450000;
-    //#20         addr <= 11;wr <= 1; wdata <= 32'h23670000;
+    #20         addr <= 8; wr <= 1; wdata <= 32'h20010000;
+    #20         addr <= 9; wr <= 1; wdata <= 32'h21230000;
+    #20         addr <= 10;wr <= 1; wdata <= 32'h22450000;
+    #20         addr <= 11;wr <= 1; wdata <= 32'h23670000;
     #20         addr <= 0; wr <= 0; wdata <= 0;
     #10         working <= 1;
     #500        $stop;
 end
 always #10 clock = ~clock;
 initial begin
-    $dumpfile("pro_tb2.vcd");
+    $dumpfile("pro_tb3.vcd");
     $dumpvars();
 end
 endmodule
