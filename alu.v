@@ -5,20 +5,13 @@ input[31:0]         aluB,
 input[3:0]          alufun,
 output[31:0]        valE
 );
-reg[31:0]           valE;
-always @(alufun) begin
-    case(alufun)
-        0: begin valE <= aluA + aluB; end
-        1: begin valE <= aluA - aluB; end
-        2: begin valE <= aluA && aluB; end
-        3: begin //logical XOR: AB'+A'B, not bitwise XOR: A^B
-            valE <= ((!aluA)&&aluB)||(aluA&&(!aluB)); 
-           end
-        default: begin valE <= 32'bz; end
-    endcase
-end
+assign valE = (alufun == 0) ? (aluA + aluB) : 
+              (alufun == 1) ? (aluA - aluB) :
+              (alufun == 2) ? (aluA && aluB):
+              (alufun == 3) ? ((!aluA)&&aluB)||(aluA&&(!aluB)) :
+              32'bz;
 endmodule
-/*
+
 //-------Testbench of ALU-------//
 module alu_tb;
 reg[31:0]       aluA;
@@ -39,8 +32,7 @@ initial begin
     #80 $stop;
 end
 initial begin
-    $dumpfile("tb/alu_tb.vcd");
+    $dumpfile("alu_tb.vcd");
     $dumpvars();
 end
 endmodule
-*/

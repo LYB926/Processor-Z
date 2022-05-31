@@ -73,6 +73,8 @@ reg[3:0]        D_ifun  = 4'bz;
 reg[3:0]        D_rA    = 4'bz;
 reg[3:0]        D_rB    = 4'bz;
 reg[15:0]       D_valC  = 16'bz;
+reg[31:0]       D_valA  = 32'bz;
+reg[31:0]       D_valB  = 32'bz;
 wire[31:0]      d_valA  = 32'bz;
 wire[31:0]      d_valB  = 32'bz;
 wire[3:0]       d_rA    = 4'bz;
@@ -83,6 +85,8 @@ wire[3:0]       d_rB    = 4'bz;
 //assign rA     = D_rB;
 //assign rB     = D_rB;
 //assign valC   = D_valC;
+//assign valA     = d_valA;
+//assign valB     = d_valB;
 assign valA     = d_valA;
 assign valB     = d_valB;
 assign d_rA     = D_rA;
@@ -94,6 +98,8 @@ always @(posedge clock) begin
         D_rA    <= F_read[23:20];
         D_rB    <= F_read[19:16];
         D_valC  <= F_read[15: 0];
+        D_valA  <= d_valA;
+        D_valB  <= d_valB;
     end
 end
 
