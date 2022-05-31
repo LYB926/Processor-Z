@@ -20,61 +20,71 @@ output[31:0]        r5,
 output[31:0]        r6,
 output[31:0]        r7
 );
-reg[31:0]           r0, r1, r2, r3, r4, r5,r6, r7;
-reg[31:0]           valA, valB;
-
+reg[31:0]           r_r0, r_r1, r_r2, r_r3, r_r4, r_r5,r_r6, r_r7;
+reg[31:0]           r_valA, r_valB;
+assign              valA = r_valA;
+assign              valB = r_valB;
+assign              r0   = r_r0;
+assign              r1   = r_r1;
+assign              r2   = r_r2;
+assign              r3   = r_r3;
+assign              r4   = r_r4;
+assign              r5   = r_r5;
+assign              r6   = r_r6;
+assign              r7   = r_r7;
 always @(posedge clock or negedge reset) begin
     if (reset)begin
-        valA <= 0; valB <= 0;
-        r0 <= 0; r1 <= 0; r2 <= 0; r3 <= 0; 
-        r4 <= 0; r5 <= 0; r6 <= 0; r7 <= 0; 
+        r_valA <= 0; r_valB <= 0;
+        r_r0 <= 0; r_r1 <= 0; r_r2 <= 0; r_r3 <= 0; 
+        r_r4 <= 0; r_r5 <= 0; r_r6 <= 0; r_r7 <= 0; 
     end
     else begin
         case(dstE)
-            0: begin r0 <= valE; end
-            1: begin r1 <= valE; end
-            2: begin r2 <= valE; end
-            3: begin r3 <= valE; end
-            4: begin r4 <= valE; end
-            5: begin r5 <= valE; end
-            6: begin r6 <= valE; end
-            7: begin r7 <= valE; end
+            0: begin r_r0 <= valE; end
+            1: begin r_r1 <= valE; end
+            2: begin r_r2 <= valE; end
+            3: begin r_r3 <= valE; end
+            4: begin r_r4 <= valE; end
+            5: begin r_r5 <= valE; end
+            6: begin r_r6 <= valE; end
+            7: begin r_r7 <= valE; end
         endcase
         case(dstM)
-            0: begin r0 <= valM; end
-            1: begin r1 <= valM; end
-            2: begin r2 <= valM; end
-            3: begin r3 <= valM; end
-            4: begin r4 <= valM; end
-            5: begin r5 <= valM; end
-            6: begin r6 <= valM; end
-            7: begin r7 <= valM; end
+            0: begin r_r0 <= valM; end
+            1: begin r_r1 <= valM; end
+            2: begin r_r2 <= valM; end
+            3: begin r_r3 <= valM; end
+            4: begin r_r4 <= valM; end
+            5: begin r_r5 <= valM; end
+            6: begin r_r6 <= valM; end
+            7: begin r_r7 <= valM; end
         endcase
         case(rA)
-            0: begin valA <= r0; end
-            1: begin valA <= r1; end
-            2: begin valA <= r2; end
-            3: begin valA <= r3; end
-            4: begin valA <= r4; end
-            5: begin valA <= r5; end
-            6: begin valA <= r6; end
-            7: begin valA <= r7; end
-            default: begin valA <= 32'bz; end
+            0: begin r_valA <= r0; end
+            1: begin r_valA <= r1; end
+            2: begin r_valA <= r2; end
+            3: begin r_valA <= r3; end
+            4: begin r_valA <= r4; end
+            5: begin r_valA <= r5; end
+            6: begin r_valA <= r6; end
+            7: begin r_valA <= r7; end
+            default: begin r_valA <= 32'bz; end
         endcase
         case(rB)
-            0: begin valB <= r0; end
-            1: begin valB <= r1; end
-            2: begin valB <= r2; end
-            3: begin valB <= r3; end
-            4: begin valB <= r4; end
-            5: begin valB <= r5; end
-            6: begin valB <= r6; end
-            7: begin valB <= r7; end
-            default: begin valB <= 32'bz; end
+            0: begin r_valB <= r0; end
+            1: begin r_valB <= r1; end
+            2: begin r_valB <= r2; end
+            3: begin r_valB <= r3; end
+            4: begin r_valB <= r4; end
+            5: begin r_valB <= r5; end
+            6: begin r_valB <= r6; end
+            7: begin r_valB <= r7; end
+            default: begin r_valB <= 32'bz; end
         endcase   
     end
 end
 endmodule
+
 /*
 module regfile_tb;
 reg[3:0]          dstE;
@@ -104,6 +114,7 @@ regfile regfile(
                   valM,
                   reset,
                   clock,
+
                   r0, r1, r2, r3, r4, r5, r6, r7
 );
 initial begin
