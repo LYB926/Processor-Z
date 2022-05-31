@@ -24,6 +24,10 @@ output[31:0]    r7
 //output[15:0]    valC
 );
 parameter IRMOV = 8'h10;
+parameter ADD   = 8'h20;
+parameter SUB   = 8'h21;
+parameter AND   = 8'h22;
+parameter XOR   = 8'h23;
 ram ram(
                 .clock(clock),
                 .addr(addr_w),
@@ -52,12 +56,12 @@ regfile regfile(
                 .r6(r6),
                 .r7(r7)
 );
-/*alu alu(
-                .aluA(),
-                .aluB(),
-                .alufun(),
-                .valE()
-);*/
+alu alu(
+                .aluA(e_valA),
+                .aluB(e_valB),
+                .alufun(e_alufun),
+                .valE(e_valE)
+);
 //-----Fetch stage signals-----//
 reg[8:0]        PC = 0;
 wire[8:0]       addr_w;
@@ -120,24 +124,44 @@ end
 reg[3:0]          E_dstM = 4'bz;
 reg[31:0]         E_valM = 32'bz;
 reg               e_reg_rst;
+wire[31:0]        e_valA = 32'bz;
+wire[31:0]        e_valB = 32'bz;
+wire[3:0]         e_alufun = 4'bz;
+wire[31:0]        e_valE = 32'bz;
+reg[3:0]          E_rA    = 4'bz;
+reg[31:0]         E_valE = 32'bz;
 initial begin
         e_reg_rst <= 1;
     #20 e_reg_rst <= 0;
 end
 //----------Execute stage---------//
+assign            valE   = e_valE; 
+assign            e_valA = D_valA;
+assign            e_valB = D_valB;
+assign            e_alufun = 
+                  ({D_icode, D_ifun} == ADD) ? 0 :
+                  ({D_icode, D_ifun} == SUB) ? 1 :
+                  ({D_icode, D_ifun} == AND) ? 2 :
+                  ({D_icode, D_ifun} == XOR) ? 3 : 4'bz;
 always @(posedge clock) begin
     if ({D_icode, D_ifun} == IRMOV)begin
         E_dstM <= D_rB;
         E_valM <= D_valC;
     end
+    E_rA   <= D_rA;
+    E_valE <= e_valE;
 end
 //----Write-back stage signals----//
 reg[3:0]          w_dstM = 4'bz;
 reg[31:0]         w_valM = 32'bz;
+reg[3:0]          w_dstE = 4'bz;
+reg[31:0]         w_valE = 32'bz;
 //-----------Write-back-----------//
 always @(posedge clock) begin
         w_dstM <= E_dstM;
         w_valM <= E_valM;
+        w_dstE <= E_rA;
+        w_valE <= E_valE;
 end
 
 endmodule
@@ -196,7 +220,7 @@ initial begin
 end
 always #10 clock = ~clock;
 initial begin
-    $dumpfile("pro_tb3.vcd");
+    $dumpfile("pro_tb4.vcd");
     $dumpvars();
 end
 endmodule
