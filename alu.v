@@ -11,7 +11,7 @@ assign valE = (alufun == 0) ? (aluA + aluB) :
               (alufun == 3) ? ((!aluA)&&aluB)||(aluA&&(!aluB)) :
               32'bz;
 endmodule
-
+/*
 //-------Testbench of ALU-------//
 module alu_tb;
 reg[31:0]       aluA;
@@ -36,3 +36,4 @@ initial begin
     $dumpvars();
 end
 endmodule
+*/

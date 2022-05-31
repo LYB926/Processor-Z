@@ -6,8 +6,9 @@ input[8:0]      addr,
 input           wr,
 input[31:0]     wdata,
 input           working,
-output[31:0]    valA,
-output[31:0]    valB,
+//output[31:0]    valA,
+//output[31:0]    valB,
+output[31:0]    valE,
 output[31:0]    r0,
 output[31:0]    r1,
 output[31:0]    r2,
@@ -51,6 +52,12 @@ regfile regfile(
                 .r6(r6),
                 .r7(r7)
 );
+/*alu alu(
+                .aluA(),
+                .aluB(),
+                .alufun(),
+                .valE()
+);*/
 //-----Fetch stage signals-----//
 reg[8:0]        PC = 0;
 wire[8:0]       addr_w;
@@ -68,17 +75,20 @@ always @(posedge clock) begin
 end
 
 //------Decode stage signals-----//
+reg[3:0]        d_icode = 4'bz;
+reg[3:0]        d_ifun  = 4'bz;
+reg[3:0]        d_rA    = 4'bz;
+reg[3:0]        d_rB    = 4'bz;
+reg[15:0]       d_valC  = 16'bz;
+wire[31:0]      d_valA  = 32'bz;
+wire[31:0]      d_valB  = 32'bz;
 reg[3:0]        D_icode = 4'bz;
 reg[3:0]        D_ifun  = 4'bz;
 reg[3:0]        D_rA    = 4'bz;
 reg[3:0]        D_rB    = 4'bz;
-reg[15:0]       D_valC  = 16'bz;
 reg[31:0]       D_valA  = 32'bz;
 reg[31:0]       D_valB  = 32'bz;
-wire[31:0]      d_valA  = 32'bz;
-wire[31:0]      d_valB  = 32'bz;
-wire[3:0]       d_rA    = 4'bz;
-wire[3:0]       d_rB    = 4'bz;
+reg[15:0]       D_valC  = 16'bz;
 //-------------Decode------------//
 //assign icode  = D_icode;
 //assign ifun   = D_ifun;
@@ -87,17 +97,20 @@ wire[3:0]       d_rB    = 4'bz;
 //assign valC   = D_valC;
 //assign valA     = d_valA;
 //assign valB     = d_valB;
-assign valA     = d_valA;
-assign valB     = d_valB;
-assign d_rA     = D_rA;
-assign d_rB     = D_rB;         
+//assign d_rA     = D_rA;
+//assign d_rB     = D_rB;         
 always @(posedge clock) begin
     if (working)begin
-        D_icode <= F_read[31:28];
-        D_ifun  <= F_read[27:24];
-        D_rA    <= F_read[23:20];
-        D_rB    <= F_read[19:16];
-        D_valC  <= F_read[15: 0];
+        d_icode <= F_read[31:28];
+        d_ifun  <= F_read[27:24];
+        d_rA    <= F_read[23:20];
+        d_rB    <= F_read[19:16];
+        d_valC  <= F_read[15: 0];
+        D_icode <= d_icode;
+        D_ifun  <= d_ifun;
+        D_rA    <= d_rA;
+        D_rB    <= d_rB;
+        D_valC  <= d_valC;
         D_valA  <= d_valA;
         D_valB  <= d_valB;
     end
@@ -123,10 +136,8 @@ reg[3:0]          w_dstM = 4'bz;
 reg[31:0]         w_valM = 32'bz;
 //-----------Write-back-----------//
 always @(posedge clock) begin
-    //if ({D_icode, D_ifun} == IRMOV)begin
         w_dstM <= E_dstM;
         w_valM <= E_valM;
-    //end
 end
 
 endmodule
@@ -138,7 +149,8 @@ reg[8:0]        addr;
 reg             wr;
 reg[31:0]       wdata;
 reg             working;
-wire[31:0]      valA, valB; 
+//wire[31:0]      valA, valB; 
+wire[31:0]      valE;
 wire[31:0]      r0, r1, r2, r3, r4, r5, r6, r7;
 //wire[3:0]       icode;
 //wire[3:0]       ifun;
@@ -158,8 +170,9 @@ processor processor(
                 //rA,
                 //rB,
                 //valC,
-                valA,
-                valB,
+                //valA,
+                //valB,
+                valE,
                 r0, r1, r2, r3, r4, r5, r6, r7
                 //valE
 );

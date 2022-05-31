@@ -21,9 +21,22 @@ output[31:0]        r6,
 output[31:0]        r7
 );
 reg[31:0]           r_r0, r_r1, r_r2, r_r3, r_r4, r_r5,r_r6, r_r7;
-reg[31:0]           r_valA, r_valB;
-assign              valA = r_valA;
-assign              valB = r_valB;
+assign              valA = (rA == 0) ? r0 :
+                           (rA == 1) ? r1 :
+                           (rA == 2) ? r2 :
+                           (rA == 3) ? r3 :
+                           (rA == 4) ? r4 :
+                           (rA == 5) ? r5 :
+                           (rA == 6) ? r6 :
+                           (rA == 7) ? r7 : 32'bz;
+assign              valB = (rB == 0) ? r0 :
+                           (rB == 1) ? r1 :
+                           (rB == 2) ? r2 :
+                           (rB == 3) ? r3 :
+                           (rB == 4) ? r4 :
+                           (rB == 5) ? r5 :
+                           (rB == 6) ? r6 :
+                           (rB == 7) ? r7 : 32'bz;
 assign              r0   = r_r0;
 assign              r1   = r_r1;
 assign              r2   = r_r2;
@@ -34,7 +47,7 @@ assign              r6   = r_r6;
 assign              r7   = r_r7;
 always @(posedge clock or negedge reset) begin
     if (reset)begin
-        r_valA <= 0; r_valB <= 0;
+        //r_valA <= 0; r_valB <= 0;
         r_r0 <= 0; r_r1 <= 0; r_r2 <= 0; r_r3 <= 0; 
         r_r4 <= 0; r_r5 <= 0; r_r6 <= 0; r_r7 <= 0; 
     end
@@ -59,28 +72,6 @@ always @(posedge clock or negedge reset) begin
             6: begin r_r6 <= valM; end
             7: begin r_r7 <= valM; end
         endcase
-        case(rA)
-            0: begin r_valA <= r0; end
-            1: begin r_valA <= r1; end
-            2: begin r_valA <= r2; end
-            3: begin r_valA <= r3; end
-            4: begin r_valA <= r4; end
-            5: begin r_valA <= r5; end
-            6: begin r_valA <= r6; end
-            7: begin r_valA <= r7; end
-            default: begin r_valA <= 32'bz; end
-        endcase
-        case(rB)
-            0: begin r_valB <= r0; end
-            1: begin r_valB <= r1; end
-            2: begin r_valB <= r2; end
-            3: begin r_valB <= r3; end
-            4: begin r_valB <= r4; end
-            5: begin r_valB <= r5; end
-            6: begin r_valB <= r6; end
-            7: begin r_valB <= r7; end
-            default: begin r_valB <= 32'bz; end
-        endcase 
     end
 end
 endmodule
@@ -156,4 +147,4 @@ initial begin
     $dumpfile("regfile_tb.vcd");
     $dumpvars;
 end
-endmodule*/
+endmodule */
