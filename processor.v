@@ -6,7 +6,7 @@ input[8:0]      addr,
 input           wr,
 input[31:0]     wdata,
 input           working,
-input[3:0]      rID,
+//input[3:0]      rID,
 //output[31:0]    valA,
 //output[31:0]    valB,
 output[31:0]    valE,
@@ -17,8 +17,8 @@ output[31:0]    r3,
 output[31:0]    r4,
 output[31:0]    r5,
 output[31:0]    r6,
-output[31:0]    r7,
-output[31:0]    rdata
+output[31:0]    r7
+//output[31:0]    rdata
 //output[3:0]     icode,
 //output[3:0]     ifun,
 //output[3:0]     rA,
@@ -150,6 +150,10 @@ always @(posedge clock) begin
         E_dstM <= D_rB;
         E_valM <= D_valC;
     end
+    else begin
+        E_dstM <= 4'bz;
+        E_valM <= 32'bz;
+    end
     E_dstE <= D_rA;
     E_valE <= e_valE;
 end
@@ -159,14 +163,14 @@ reg[3:0]          w_dstM = 4'bz;
 reg[31:0]         w_valM = 32'bz;
 reg[3:0]          w_dstE = 4'bz;
 reg[31:0]         w_valE = 32'bz;
-assign            rdata  = (rID == 0) ? r0 :
+/*assign            rdata  = (rID == 0) ? r0 :
                            (rID == 1) ? r1 :
                            (rID == 2) ? r2 :
                            (rID == 3) ? r3 :
                            (rID == 4) ? r4 :
                            (rID == 5) ? r5 :
                            (rID == 6) ? r6 :
-                           (rID == 7) ? r7 : 32'bz;
+                           (rID == 7) ? r7 : 32'bz;*/
 //-----------Write-back-----------//
 always @(posedge clock) begin
         w_dstM <= E_dstM;
@@ -175,7 +179,7 @@ always @(posedge clock) begin
         w_valE <= E_valE;
 end
 endmodule
-
+/*
 //-----Testbench of processor(Task 5)-----//
 module pro_tb4;
 reg             clock;
@@ -245,8 +249,8 @@ initial begin
     $dumpvars();
 end
 endmodule
+*/
 
-/*
 //-----Testbench of processor-----//
 module pro_tb4;
 reg             clock;
@@ -254,11 +258,11 @@ reg[8:0]        addr;
 reg             wr;
 reg[31:0]       wdata;
 reg             working;
-reg[3:0]        rID;
+//reg[3:0]        rID;
 //wire[31:0]      valA, valB; 
 wire[31:0]      valE;
 wire[31:0]      r0, r1, r2, r3, r4, r5, r6, r7;
-wire[31:0]      rdata;
+//wire[31:0]      rdata;
 //wire[3:0]       icode;
 //wire[3:0]       ifun;
 //wire[3:0]       rA;
@@ -271,7 +275,7 @@ processor processor(
                 wr,
                 wdata,
                 working,
-                rID,
+                //rID,
                 //icode,
                 //ifun,
                 //rA,
@@ -280,12 +284,12 @@ processor processor(
                 //valA,
                 //valB,
                 valE,
-                r0, r1, r2, r3, r4, r5, r6, r7,
-                rdata
+                r0, r1, r2, r3, r4, r5, r6, r7
+                //rdata
                 //valE
 );
 initial begin
-    clock <= 0; addr <= 0; wr <= 0; wdata <= 0; working <= 0; rID <=0;
+    clock <= 0; addr <= 0; wr <= 0; wdata <= 0; working <= 0; //rID <=0;
     #20         addr <= 0; wr <= 1; wdata <= 32'h10F00080;
     #20         addr <= 1; wr <= 1; wdata <= 32'h10F10081;
     #20         addr <= 2; wr <= 1; wdata <= 32'h10F20082;
@@ -304,11 +308,11 @@ initial begin
 end
 always #10 clock = ~clock;
 initial begin
-    $dumpfile("tb/pro_tb4.vcd");
+    $dumpfile("pro_tb4.vcd");
     $dumpvars();
 end
 endmodule
-*/
+
 
 /*
 //-----Testbench of processor (Task 1)-------//
