@@ -27,11 +27,11 @@ wire            rd;
 wire[31:0]      rdata;
 wire[31:0]      F_read;
 //-----Decode stage signals-----//
-reg[3:0]        D_icode;
-reg[3:0]        D_ifun;
-reg[3:0]        D_rA;
-reg[3:0]        D_rB;
-reg[15:0]       D_valC;
+reg[3:0]        D_icode = 32'bz;
+reg[3:0]        D_ifun  = 32'bz;
+reg[3:0]        D_rA    = 32'bz;
+reg[3:0]        D_rB    = 32'bz;
+reg[15:0]       D_valC  = 32'bz;
 //-----------Fetch-------------//
 assign addr_w = (working) ? PC   : addr;
 assign rd     = (working) ? 1    : 0;
@@ -42,26 +42,21 @@ always @(posedge clock) begin
     end
 end
 //-------------Decode------------//
-assign icode  = F_read[31:28];
-assign ifun   = F_read[27:24];
-assign rA     = F_read[23:20];
-assign rB     = F_read[19:16];
-assign valC   = F_read[15: 0];
+assign icode  = D_icode;
+assign ifun   = D_ifun;
+assign rA     = D_rB;
+assign rB     = D_rB;
+assign valC   = D_valC;
 always @(posedge clock) begin
     if (working)begin
-        D_icode <= icode;
-        D_ifun  <= ifun;
-        D_rA    <= rA;
-        D_rB    <= rB;
-        D_valC  <= valC;
+        D_icode <= F_read[31:28];
+        D_ifun  <= F_read[27:24];
+        D_rA    <= F_read[23:20];
+        D_rB    <= F_read[19:16];
+        D_valC  <= F_read[15: 0];
     end
 end
-
 endmodule
-
-
-
-
 
 //-----Testbench of processor (Task 1)-------//
 module pro_tb;
