@@ -26,6 +26,12 @@ wire[8:0]       addr_w;
 wire            rd;
 wire[31:0]      rdata;
 wire[31:0]      F_read;
+//-----Decode stage signals-----//
+reg[3:0]        D_icode;
+reg[3:0]        D_ifun;
+reg[3:0]        D_rA;
+reg[3:0]        D_rB;
+reg[15:0]       D_valC;
 //-----------Fetch-------------//
 assign addr_w = (working) ? PC   : addr;
 assign rd     = (working) ? 1    : 0;
@@ -35,12 +41,22 @@ always @(posedge clock) begin
         PC <= PC + 1;
     end
 end
-//-------Decoding------//
+//-------------Decode------------//
 assign icode  = F_read[31:28];
 assign ifun   = F_read[27:24];
 assign rA     = F_read[23:20];
 assign rB     = F_read[19:16];
 assign valC   = F_read[15: 0];
+always @(posedge clock) begin
+    if (working)begin
+        D_icode <= icode;
+        D_ifun  <= ifun;
+        D_rA    <= rA;
+        D_rB    <= rB;
+        D_valC  <= valC;
+    end
+end
+
 endmodule
 
 
