@@ -6,6 +6,7 @@ input[8:0]      addr,
 input           wr,
 input[31:0]     wdata,
 input           working,
+input[3:0]      rID,
 //output[31:0]    valA,
 //output[31:0]    valB,
 output[31:0]    valE,
@@ -16,7 +17,8 @@ output[31:0]    r3,
 output[31:0]    r4,
 output[31:0]    r5,
 output[31:0]    r6,
-output[31:0]    r7
+output[31:0]    r7,
+output[31:0]    rdata
 //output[3:0]     icode,
 //output[3:0]     ifun,
 //output[3:0]     rA,
@@ -30,11 +32,11 @@ parameter AND   = 8'h22;
 parameter XOR   = 8'h23;
 ram ram(
                 .clock(clock),
-                .addr(addr_w),
+                .addr(f_addr),
                 .wr(wr),
                 .wdata(wdata),
-                .rd(rd),
-                .rdata(rdata)
+                .rd(f_rd),
+                .rdata(f_rdata)
 );
 regfile regfile(
                 .dstE(w_dstE),
@@ -64,14 +66,14 @@ alu alu(
 );
 //-----Fetch stage signals-----//
 reg[8:0]        PC = 0;
-wire[8:0]       addr_w;
-wire            rd;
-wire[31:0]      rdata;
+wire[8:0]       f_addr;
+wire            f_rd;
+wire[31:0]      f_rdata;
 wire[31:0]      F_read;
 //------------Fetch--------------//
-assign addr_w = (working) ? PC   : addr;
-assign rd     = (working) ? 1    : 0;
-assign F_read = rdata;
+assign f_addr = (working) ? PC   : addr;
+assign f_rd     = (working) ? 1    : 0;
+assign F_read = f_rdata;
 always @(posedge clock) begin
     if (working)begin
         PC <= PC + 1;
@@ -157,6 +159,14 @@ reg[3:0]          w_dstM = 4'bz;
 reg[31:0]         w_valM = 32'bz;
 reg[3:0]          w_dstE = 4'bz;
 reg[31:0]         w_valE = 32'bz;
+assign            rdata  = (rID == 0) ? r0 :
+                           (rID == 1) ? r1 :
+                           (rID == 2) ? r2 :
+                           (rID == 3) ? r3 :
+                           (rID == 4) ? r4 :
+                           (rID == 5) ? r5 :
+                           (rID == 6) ? r6 :
+                           (rID == 7) ? r7 : 32'bz;
 //-----------Write-back-----------//
 always @(posedge clock) begin
         w_dstM <= E_dstM;
@@ -166,17 +176,18 @@ always @(posedge clock) begin
 end
 endmodule
 
-
-//-----Testbench of processor-----//
+//-----Testbench of processor(Task 5)-----//
 module pro_tb4;
 reg             clock;
 reg[8:0]        addr;
 reg             wr;
 reg[31:0]       wdata;
 reg             working;
+reg[3:0]        rID;
 //wire[31:0]      valA, valB; 
 wire[31:0]      valE;
 wire[31:0]      r0, r1, r2, r3, r4, r5, r6, r7;
+wire[31:0]      rdata;
 //wire[3:0]       icode;
 //wire[3:0]       ifun;
 //wire[3:0]       rA;
@@ -189,6 +200,7 @@ processor processor(
                 wr,
                 wdata,
                 working,
+                rID,
                 //icode,
                 //ifun,
                 //rA,
@@ -197,11 +209,83 @@ processor processor(
                 //valA,
                 //valB,
                 valE,
-                r0, r1, r2, r3, r4, r5, r6, r7
+                r0, r1, r2, r3, r4, r5, r6, r7,
+                rdata
                 //valE
 );
 initial begin
-    clock <= 0; addr <= 0; wr <= 0; wdata <= 0; working <= 0;
+    clock <= 0; addr <= 0; wr <= 0; wdata <= 0; working <= 0; rID <=0;
+    #20         addr <= 0; wr <= 1; wdata <= 32'h10F00080;
+    #20         addr <= 1; wr <= 1; wdata <= 32'h10F10081;
+    #20         addr <= 2; wr <= 1; wdata <= 32'h10F20082;
+    #20         addr <= 3; wr <= 1; wdata <= 32'h10F30083;
+    #20         addr <= 4; wr <= 1; wdata <= 32'h10F40084;
+    #20         addr <= 5; wr <= 1; wdata <= 32'h10F50085;
+    #20         addr <= 6; wr <= 1; wdata <= 32'h10F60086;
+    #20         addr <= 7; wr <= 1; wdata <= 32'h10F70087;
+    #20         addr <= 8; wr <= 1; wdata <= 32'h20010000;
+    #20         addr <= 9; wr <= 1; wdata <= 32'h21230000;
+    #20         addr <= 10;wr <= 1; wdata <= 32'h22450000;
+    #20         addr <= 11;wr <= 1; wdata <= 32'h23670000;
+    #20         addr <= 12;wr <= 1; wdata <= 32'h21540000;
+    #20         addr <= 13;wr <= 1; wdata <= 32'h22760000;
+    #20         addr <= 14;wr <= 1; wdata <= 32'h20320000;
+    #20         addr <= 15;wr <= 1; wdata <= 32'h23100000;
+    #20         addr <= 16;wr <= 1; wdata <= 32'h20350000;
+    #20         addr <= 17;wr <= 1; wdata <= 32'h21240000;
+    #20         addr <= 18;wr <= 1; wdata <= 32'h23060000;
+    #20         addr <= 19;wr <= 1; wdata <= 32'h22170000;
+    #20         addr <= 0; wr <= 0; wdata <= 0;
+    #10         working <= 1;
+    #1500       $stop;
+end
+always #10 clock = ~clock;
+initial begin
+    $dumpfile("pro_tb5.vcd");
+    $dumpvars();
+end
+endmodule
+
+/*
+//-----Testbench of processor-----//
+module pro_tb4;
+reg             clock;
+reg[8:0]        addr;
+reg             wr;
+reg[31:0]       wdata;
+reg             working;
+reg[3:0]        rID;
+//wire[31:0]      valA, valB; 
+wire[31:0]      valE;
+wire[31:0]      r0, r1, r2, r3, r4, r5, r6, r7;
+wire[31:0]      rdata;
+//wire[3:0]       icode;
+//wire[3:0]       ifun;
+//wire[3:0]       rA;
+//wire[3:0]       rB;
+//wire[15:0]      valC;
+//wire[31:0]      valE;
+processor processor(
+                clock,
+                addr,
+                wr,
+                wdata,
+                working,
+                rID,
+                //icode,
+                //ifun,
+                //rA,
+                //rB,
+                //valC,
+                //valA,
+                //valB,
+                valE,
+                r0, r1, r2, r3, r4, r5, r6, r7,
+                rdata
+                //valE
+);
+initial begin
+    clock <= 0; addr <= 0; wr <= 0; wdata <= 0; working <= 0; rID <=0;
     #20         addr <= 0; wr <= 1; wdata <= 32'h10F00080;
     #20         addr <= 1; wr <= 1; wdata <= 32'h10F10081;
     #20         addr <= 2; wr <= 1; wdata <= 32'h10F20082;
@@ -224,7 +308,7 @@ initial begin
     $dumpvars();
 end
 endmodule
-
+*/
 
 /*
 //-----Testbench of processor (Task 1)-------//

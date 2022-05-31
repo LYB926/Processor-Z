@@ -7,8 +7,10 @@ output[31:0]        valE
 );
 assign valE = (alufun == 0) ? (aluA + aluB) : 
               (alufun == 1) ? (aluA - aluB) :
-              (alufun == 2) ? (aluA && aluB):
-              (alufun == 3) ? ((!aluA)&&aluB)||(aluA&&(!aluB)) :
+              //(alufun == 2) ? (aluA && aluB):
+              //(alufun == 3) ? ((!aluA)&&aluB)||(aluA&&(!aluB)) :
+              (alufun == 2) ? (aluA & aluB):
+              (alufun == 3) ? ((~aluA)&aluB)|(aluA&(~aluB)) :
               32'bz;
 endmodule
 /*
@@ -25,7 +27,7 @@ alu alu(
                 valE
 );
 initial begin
-        alufun <= 0; aluA <= 32'hBE; aluB <= 32'hAA; 
+        alufun <= 0; aluA <= 32'h0AE20D6A; aluB <= 32'h59BB45EB; 
     #30 alufun <= 1;
     #30 alufun <= 2;
     #30 alufun <= 3;
