@@ -5,12 +5,12 @@ input[3:0]          dstE,
 input[31:0]         valE,
 input[3:0]          dstM,
 input[31:0]         valM,
-input[3:0]          rA,
-input[3:0]          rB,
+/*input[3:0]          rA,
+input[3:0]          rB,*/
 input               reset,
 input               clock,
-output[31:0]        valA,
-output[31:0]        valB,
+/*output[31:0]        valA,
+output[31:0]        valB,*/
 output[31:0]        r0,
 output[31:0]        r1,
 output[31:0]        r2,
@@ -59,7 +59,7 @@ always @(posedge clock or negedge reset) begin
             6: begin r_r6 <= valM; end
             7: begin r_r7 <= valM; end
         endcase
-        case(rA)
+        /*case(rA)
             0: begin r_valA <= r0; end
             1: begin r_valA <= r1; end
             2: begin r_valA <= r2; end
@@ -80,12 +80,12 @@ always @(posedge clock or negedge reset) begin
             6: begin r_valB <= r6; end
             7: begin r_valB <= r7; end
             default: begin r_valB <= 32'bz; end
-        endcase   
+        endcase */  
     end
 end
 endmodule
 
-/*
+
 module regfile_tb;
 reg[3:0]          dstE;
 reg[3:0]          dstM;
@@ -114,7 +114,6 @@ regfile regfile(
                   valM,
                   reset,
                   clock,
-
                   r0, r1, r2, r3, r4, r5, r6, r7
 );
 initial begin
@@ -151,4 +150,4 @@ initial begin
     $dumpfile("regfile_tb.vcd");
     $dumpvars;
 end
-endmodule*/
+endmodule
