@@ -26,6 +26,8 @@ output[31:0]    rdata
 //output[15:0]    valC
 );
 parameter IRMOV = 8'h10;
+parameter HALT  = 8'h11;
+parameter NOP   = 8'h12;
 parameter ADD   = 8'h20;
 parameter SUB   = 8'h21;
 parameter AND   = 8'h22;
@@ -71,8 +73,8 @@ wire            f_rd;
 wire[31:0]      f_rdata;
 wire[31:0]      F_read;
 //------------Fetch--------------//
-assign f_addr = (working) ? PC   : addr;
-assign f_rd     = (working) ? 1    : 0;
+assign f_addr = (working) ?  PC : addr;
+assign f_rd   = (working) ?  1  : 0;
 assign F_read = f_rdata;
 always @(posedge clock) begin
     if (working)begin
@@ -112,8 +114,14 @@ always @(posedge clock) begin
         d_rA    <= F_read[23:20];
         d_rB    <= F_read[19:16];
         d_valC  <= F_read[15: 0];
-        D_icode <= d_icode;
-        D_ifun  <= d_ifun;
+        if ({d_icode, d_ifun} == NOP) begin
+            //NOP = AND R0, R0
+            {D_icode, D_ifun} <= AND; 
+        end 
+        else begin
+            D_icode <= d_icode;
+            D_ifun  <= d_ifun;
+        end
         D_rA    <= d_rA;
         D_rB    <= d_rB;
         D_valC  <= d_valC;
@@ -253,7 +261,7 @@ always @(posedge clock ) begin
     end
 end
 initial begin
-    $dumpfile("pro_tb5.vcd");
+    $dumpfile("pro_tbe1.vcd");
     $dumpvars();
 end
 endmodule
