@@ -18,7 +18,8 @@ output[31:0]    r4,
 output[31:0]    r5,
 output[31:0]    r6,
 output[31:0]    r7,
-output[31:0]    rdata
+output[31:0]    rdata,
+output[2:0]     cc
 //output[3:0]     icode,
 //output[3:0]     ifun,
 //output[3:0]     rA,
@@ -64,7 +65,8 @@ alu alu(
                 .aluA(e_valA),
                 .aluB(e_valB),
                 .alufun(e_alufun),
-                .valE(e_valE)
+                .valE(e_valE),
+                .cc(cc)
 );
 //-----Fetch stage signals-----//
 reg[8:0]        PC = 0;
@@ -77,7 +79,7 @@ assign f_addr = (working) ?  PC : addr;
 assign f_rd   = (working) ?  1  : 0;
 assign F_read = f_rdata;
 always @(posedge clock) begin
-    if (working)begin
+    if (working&&(!d_halt))begin
         PC <= PC + 1;
     end
 end
@@ -90,6 +92,7 @@ reg[3:0]        d_rB    = 4'bz;
 reg[15:0]       d_valC  = 16'bz;
 wire[31:0]      d_valA  = 32'bz;
 wire[31:0]      d_valB  = 32'bz;
+wire            d_halt;
 reg[3:0]        D_icode = 4'bz;
 reg[3:0]        D_ifun  = 4'bz;
 reg[3:0]        D_rA    = 4'bz;
@@ -97,6 +100,7 @@ reg[3:0]        D_rB    = 4'bz;
 reg[31:0]       D_valA  = 32'bz;
 reg[31:0]       D_valB  = 32'bz;
 reg[15:0]       D_valC  = 16'bz;
+reg             D_halt  = 1'bz;
 //-------------Decode------------//
 //assign icode  = D_icode;
 //assign ifun   = D_ifun;
@@ -106,40 +110,76 @@ reg[15:0]       D_valC  = 16'bz;
 //assign valA     = d_valA;
 //assign valB     = d_valB;
 //assign d_rA     = D_rA;
-//assign d_rB     = D_rB;         
+//assign d_rB     = D_rB;
+assign          d_halt = (F_read[31:24] == HALT) ? 1 : 0;
 always @(posedge clock) begin
     if (working)begin
-        d_icode <= F_read[31:28];
-        d_ifun  <= F_read[27:24];
-        d_rA    <= F_read[23:20];
-        d_rB    <= F_read[19:16];
-        d_valC  <= F_read[15: 0];
+        if (D_halt) begin
+            d_icode <= 4'bz;
+            d_ifun  <= 4'bz;
+            d_rA    <= 4'bz;
+            d_rB    <= 4'bz;
+            d_valC  <= 16'bz;
+        end
+        else begin
+            d_icode <= F_read[31:28];
+            d_ifun  <= F_read[27:24];
+            d_rA    <= F_read[23:20];
+            d_rB    <= F_read[19:16];
+            d_valC  <= F_read[15: 0];
+        end
         if ({d_icode, d_ifun} == NOP) begin
             //NOP = AND R0, R0
-            {D_icode, D_ifun} <= AND; 
+            {D_icode, D_ifun} <= AND;
+            D_rA    <= d_rA;
+            D_rB    <= d_rB;
+            D_valC  <= d_valC;
+            D_valA  <= d_valA;
+            D_valB  <= d_valB; 
+            D_halt  <= d_halt;
         end 
+        else if ({d_icode, d_ifun} == HALT) begin
+            {D_icode, D_ifun} <= 8'bz;
+            D_rA    <= 4'bz;
+            D_rB    <= 4'bz;
+            D_valC  <= 16'bz;
+            D_valA  <= 32'bz;
+            D_valB  <= 32'bz;
+            D_halt  <= d_halt;
+            /*{D_icode, D_ifun} <= 8'bz;
+            D_rA    <= 4'bz;
+            D_rB    <= 4'bz;
+            D_valC  <= 32'bz;
+            D_valA  <= 32'bz;
+            D_valB  <= 32'bz;
+            D_halt  <= d_halt;*/
+        end
         else begin
             D_icode <= d_icode;
             D_ifun  <= d_ifun;
+            D_rA    <= d_rA;
+            D_rB    <= d_rB;
+            D_valC  <= d_valC;
+            D_valA  <= d_valA;
+            D_valB  <= d_valB;
+            D_halt  <= d_halt;
         end
-        D_rA    <= d_rA;
-        D_rB    <= d_rB;
-        D_valC  <= d_valC;
-        D_valA  <= d_valA;
-        D_valB  <= d_valB;
     end
 end
 
 //------Execute stage signals-----//
 reg[3:0]          E_dstM = 4'bz;
 reg[31:0]         E_valM = 32'bz;
+reg[3:0]          E_dstE = 4'bz;
+reg[31:0]         E_valE = 32'bz;
+reg               E_halt = 1'bz;
+reg               e_halt = 1'bz;
 reg               e_reg_rst;
 wire[31:0]        e_valA = 32'bz;
 wire[31:0]        e_valB = 32'bz;
 wire[3:0]         e_alufun = 4'bz;
 wire[31:0]        e_valE = 32'bz;
-reg[3:0]          E_dstE = 4'bz;
-reg[31:0]         E_valE = 32'bz;
+
 initial begin
         e_reg_rst <= 1;
     #20 e_reg_rst <= 0;
@@ -164,6 +204,14 @@ always @(posedge clock) begin
     end
     E_dstE <= D_rA;
     E_valE <= e_valE;
+    /*if (e_halt||E_halt) begin
+        E_dstE <= D_rA;
+        E_valE <= e_valE;
+    end
+    else begin
+    end*/
+    e_halt <= D_halt;
+    E_halt <= e_halt;
 end
 
 //----Write-back stage signals----//
@@ -201,6 +249,7 @@ wire[31:0]      valE;
 wire[31:0]      r0, r1, r2, r3, r4, r5, r6, r7;
 wire[31:0]      rdata;
 reg             flg = 0;
+wire[2:0]       cc;
 //wire[3:0]       icode;
 //wire[3:0]       ifun;
 //wire[3:0]       rA;
@@ -223,7 +272,8 @@ processor processor(
                 //valB,
                 valE,
                 r0, r1, r2, r3, r4, r5, r6, r7,
-                rdata
+                rdata,
+                cc
                 //valE
 );
 initial begin
@@ -240,6 +290,10 @@ initial begin
     #20         addr <= 9; wr <= 1; wdata <= 32'h21230000;
     #20         addr <= 10;wr <= 1; wdata <= 32'h22450000;
     #20         addr <= 11;wr <= 1; wdata <= 32'h23670000;
+    #20         addr <= 12;wr <= 1; wdata <= 32'h12000000;
+    #20         addr <= 13;wr <= 1; wdata <= 32'h22760000;
+    #20         addr <= 14;wr <= 1; wdata <= 32'h20320000;
+    #20         addr <= 15;wr <= 1; wdata <= 32'h23100000;
     //Task 5 added
     //#20         addr <= 12;wr <= 1; wdata <= 32'h21540000;
     //#20         addr <= 13;wr <= 1; wdata <= 32'h22760000;
