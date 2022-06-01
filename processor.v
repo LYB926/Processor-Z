@@ -233,14 +233,14 @@ initial begin
     #20         addr <= 10;wr <= 1; wdata <= 32'h22450000;
     #20         addr <= 11;wr <= 1; wdata <= 32'h23670000;
     //Task 5 added
-    #20         addr <= 12;wr <= 1; wdata <= 32'h21540000;
-    #20         addr <= 13;wr <= 1; wdata <= 32'h22760000;
-    #20         addr <= 14;wr <= 1; wdata <= 32'h20320000;
-    #20         addr <= 15;wr <= 1; wdata <= 32'h23100000;
-    #20         addr <= 16;wr <= 1; wdata <= 32'h20350000;
-    #20         addr <= 17;wr <= 1; wdata <= 32'h21240000;
-    #20         addr <= 18;wr <= 1; wdata <= 32'h23060000;
-    #20         addr <= 19;wr <= 1; wdata <= 32'h22170000;
+    //#20         addr <= 12;wr <= 1; wdata <= 32'h21540000;
+    //#20         addr <= 13;wr <= 1; wdata <= 32'h22760000;
+    //#20         addr <= 14;wr <= 1; wdata <= 32'h20320000;
+    //#20         addr <= 15;wr <= 1; wdata <= 32'h23100000;
+    //#20         addr <= 16;wr <= 1; wdata <= 32'h20350000;
+    //#20         addr <= 17;wr <= 1; wdata <= 32'h21240000;
+    //#20         addr <= 18;wr <= 1; wdata <= 32'h23060000;
+    //#20         addr <= 19;wr <= 1; wdata <= 32'h22170000;
     #20         addr <= 0; wr <= 0; wdata <= 0;
     #10         working <= 1;
     #560        working <= 0; flg <= 1;
