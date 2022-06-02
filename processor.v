@@ -150,18 +150,20 @@ always @(posedge clock) begin
                 D_ifun  <= d_ifun;
             end
             //RRMOV
-            if ({d_icode, d_ifun} == RRMOV)begin
-                D_valA  <= d_valA;
-                D_valB  <= 0;
-                D_rA    <= d_rB;
-                D_rB    <= d_rA;                
-            end
-            else begin
-                D_valA  <= d_valA;
-                D_valB  <= d_valB;
-                D_rA    <= d_rA;
-                D_rB    <= d_rB;
-            end
+            case({d_icode, d_ifun})
+                RRMOV:begin
+                    D_valA  <= d_valA;
+                    D_valB  <= 0;
+                    D_rA    <= d_rB;
+                    D_rB    <= d_rA; 
+                end
+                default:begin
+                    D_valA  <= d_valA;
+                    D_valB  <= d_valB;
+                    D_rA    <= d_rA;
+                    D_rB    <= d_rB;                    
+                end
+            endcase
             D_valC  <= d_valC;
             D_halt  <= d_halt;
         end
