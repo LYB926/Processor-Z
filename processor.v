@@ -33,6 +33,7 @@ parameter ADD   = 8'h20;
 parameter SUB   = 8'h21;
 parameter AND   = 8'h22;
 parameter XOR   = 8'h23;
+parameter RRMOV = 8'h30;
 ram ram(
                 .clock(clock),
                 .addr(f_addr),
@@ -80,12 +81,7 @@ assign f_rd   = (working) ?  1  : 0;
 assign F_read = f_rdata;
 always @(posedge clock) begin
     if (working)begin
-        //if (D_halt==0)begin
             PC <= PC + 1;
-        //end
-        //else if (D_halt==1) begin
-        //    PC <= PC;
-        //end
     end
 end
 
@@ -153,10 +149,19 @@ always @(posedge clock) begin
                 D_icode <= d_icode;
                 D_ifun  <= d_ifun;
             end
-            D_rA    <= d_rA;
-            D_rB    <= d_rB;
-            D_valA  <= d_valA;
-            D_valB  <= d_valB;
+            //RRMOV
+            if ({d_icode, d_ifun} == RRMOV)begin
+                D_valA  <= d_valA;
+                D_valB  <= 0;
+                D_rA    <= d_rB;
+                D_rB    <= d_rA;                
+            end
+            else begin
+                D_valA  <= d_valA;
+                D_valB  <= d_valB;
+                D_rA    <= d_rA;
+                D_rB    <= d_rB;
+            end
             D_valC  <= d_valC;
             D_halt  <= d_halt;
         end
@@ -169,6 +174,7 @@ reg[31:0]         E_valM = 32'bz;
 reg[3:0]          E_dstE = 4'bz;
 reg[31:0]         E_valE = 32'bz;
 reg               E_halt = 1'bz;
+reg[2:0]          E_cc   = 3'bz;
 wire              e_halt = 1'bz;
 reg               e_reg_rst;
 wire[31:0]        e_valA = 32'bz;
@@ -187,10 +193,11 @@ assign            e_valB = D_valB;
 assign            e_halt = D_halt;
 assign            e_dstE = D_rA;
 assign            e_alufun = 
-                  ({D_icode, D_ifun} == ADD) ? 0 :
-                  ({D_icode, D_ifun} == SUB) ? 1 :
-                  ({D_icode, D_ifun} == AND) ? 2 :
-                  ({D_icode, D_ifun} == XOR) ? 3 : 4'bz;
+                  ({D_icode, D_ifun} == ADD)   ? 0 :
+                  ({D_icode, D_ifun} == RRMOV) ? 0 :
+                  ({D_icode, D_ifun} == SUB)   ? 1 :
+                  ({D_icode, D_ifun} == AND)   ? 2 :
+                  ({D_icode, D_ifun} == XOR)   ? 3 : 4'bz;
 always @(posedge clock) begin
     if ({D_icode, D_ifun} == IRMOV)begin
         E_dstM <= D_rB;
@@ -202,6 +209,7 @@ always @(posedge clock) begin
     end
     E_dstE <= e_dstE;
     E_valE <= e_valE;
+    E_cc   <= cc;
     E_halt <= e_halt;
 end
 
@@ -278,10 +286,19 @@ initial begin
     #20         addr <= 6; wr <= 1; wdata <= 32'h10F60086;
     #20         addr <= 7; wr <= 1; wdata <= 32'h10F70087;
 
+    #20         addr <= 8; wr <= 1; wdata <= 32'h20100000;  
+    #20         addr <= 9; wr <= 1; wdata <= 32'h30120000;
+    #20         addr <= 10;wr <= 1; wdata <= 32'h22320000;
+    #20         addr <= 11;wr <= 1; wdata <= 32'h23430000;
+    #20         addr <= 12;wr <= 1; wdata <= 32'h30430000;  
+    #20         addr <= 13;wr <= 1; wdata <= 32'h22430000;
+    #20         addr <= 14;wr <= 1; wdata <= 32'h20430000;
+    #20         addr <= 15;wr <= 1; wdata <= 32'h23430000;
+
     //Ex Task 2 added
     //ADD   = 8'h20;SUB   = 8'h21;
     //AND   = 8'h22;XOR   = 8'h23;
-    #20         addr <= 8; wr <= 1; wdata <= 32'h20100000;  
+    /*#20         addr <= 8; wr <= 1; wdata <= 32'h20100000;  
     #20         addr <= 9; wr <= 1; wdata <= 32'h21210000;
     #20         addr <= 10;wr <= 1; wdata <= 32'h22320000;
     #20         addr <= 11;wr <= 1; wdata <= 32'h23430000;
@@ -292,7 +309,7 @@ initial begin
     #20         addr <= 16;wr <= 1; wdata <= 32'h20340000;
     #20         addr <= 17;wr <= 1; wdata <= 32'h21430000;
     #20         addr <= 18;wr <= 1; wdata <= 32'h23340000;
-    #20         addr <= 19;wr <= 1; wdata <= 32'h22430000;
+    #20         addr <= 19;wr <= 1; wdata <= 32'h22430000;*/
     //Ex Task 1 added 
     /*#20         addr <= 8; wr <= 1; wdata <= 32'h20010000;
     #20         addr <= 9; wr <= 1; wdata <= 32'h11000000;
