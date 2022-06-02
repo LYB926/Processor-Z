@@ -50,8 +50,8 @@ regfile regfile(
                 .rB(d_rB),
                 .reset(e_reg_rst),
                 .clock(clock),
-                .valA(d_valA),
-                .valB(d_valB),
+                .valA(d_valA_reg),
+                .valB(d_valB_reg),
                 .r0(r0),
                 .r1(r1),
                 .r2(r2),
@@ -97,6 +97,8 @@ reg[3:0]        d_rB    = 4'bz;
 reg[15:0]       d_valC  = 16'bz;
 wire[31:0]      d_valA  = 32'bz;
 wire[31:0]      d_valB  = 32'bz;
+wire[31:0]      d_valA_reg  = 32'bz;
+wire[31:0]      d_valB_reg  = 32'bz;
 wire            d_halt;
 reg[3:0]        D_icode = 4'bz;
 reg[3:0]        D_ifun  = 4'bz;
@@ -116,6 +118,15 @@ reg             D_halt  = 1'bz;
 //assign valB     = d_valB;
 //assign d_rA     = D_rA;
 //assign d_rB     = D_rB;
+//Determine valA and valB with forwarding:
+assign          d_valA = (e_dstE == d_rA) ? e_valE :
+                         (E_dstE == d_rA) ? E_valE :
+                         (w_dstE == d_rA) ? w_valE :
+                         (w_dstM == d_rA) ? w_valM : d_valA_reg;
+assign          d_valB = (e_dstE == d_rB) ? e_valE :
+                         (E_dstE == d_rB) ? E_valE :
+                         (w_dstE == d_rB) ? w_valE :
+                         (w_dstM == d_rB) ? w_valM : d_valB_reg;
 assign          d_halt = ({d_icode, d_ifun} == HALT) ? 1 : 0;
 always @(posedge clock) begin
     if (working)begin
@@ -124,17 +135,8 @@ always @(posedge clock) begin
         d_rA    <= F_read[23:20];
         d_rB    <= F_read[19:16];
         d_valC  <= F_read[15: 0];
-        if ({d_icode, d_ifun} == NOP) begin
-            //NOP = AND R0, R0
-            {D_icode, D_ifun} <= AND;
-            D_rA    <= d_rA;
-            D_rB    <= d_rB;
-            D_valC  <= d_valC;
-            D_valA  <= d_valA;
-            D_valB  <= d_valB; 
-            D_halt  <= d_halt;
-        end 
-        else if (d_halt) begin
+        
+        if (d_halt) begin
             {D_icode, D_ifun} <= 8'bz;
             D_rA    <= 4'bz;
             D_rB    <= 4'bz;
@@ -144,13 +146,18 @@ always @(posedge clock) begin
             D_halt  <= d_halt;
         end
         else begin
-            D_icode <= d_icode;
-            D_ifun  <= d_ifun;
+            if ({d_icode, d_ifun} == NOP) begin
+                {D_icode, D_ifun} <= AND;//NOP = AND R0, R0
+            end
+            else begin 
+                D_icode <= d_icode;
+                D_ifun  <= d_ifun;
+            end
             D_rA    <= d_rA;
             D_rB    <= d_rB;
-            D_valC  <= d_valC;
             D_valA  <= d_valA;
             D_valB  <= d_valB;
+            D_valC  <= d_valC;
             D_halt  <= d_halt;
         end
     end
@@ -168,7 +175,7 @@ wire[31:0]        e_valA = 32'bz;
 wire[31:0]        e_valB = 32'bz;
 wire[3:0]         e_alufun = 4'bz;
 wire[31:0]        e_valE = 32'bz;
-
+wire[3:0]         e_dstE = 4'bz;
 initial begin
         e_reg_rst <= 1;
     #20 e_reg_rst <= 0;
@@ -178,6 +185,7 @@ assign            valE   = e_valE;
 assign            e_valA = D_valA;
 assign            e_valB = D_valB;
 assign            e_halt = D_halt;
+assign            e_dstE = D_rA;
 assign            e_alufun = 
                   ({D_icode, D_ifun} == ADD) ? 0 :
                   ({D_icode, D_ifun} == SUB) ? 1 :
@@ -189,12 +197,11 @@ always @(posedge clock) begin
         E_valM <= D_valC;
     end
     else begin
-        E_dstM <= 4'bz;
+        E_dstM <= 4'hF;
         E_valM <= 32'bz;
     end
-    E_dstE <= D_rA;
+    E_dstE <= e_dstE;
     E_valE <= e_valE;
-
     E_halt <= e_halt;
 end
 
@@ -271,8 +278,23 @@ initial begin
     #20         addr <= 6; wr <= 1; wdata <= 32'h10F60086;
     #20         addr <= 7; wr <= 1; wdata <= 32'h10F70087;
 
+    //Ex Task 2 added
+    //ADD   = 8'h20;SUB   = 8'h21;
+    //AND   = 8'h22;XOR   = 8'h23;
+    #20         addr <= 8; wr <= 1; wdata <= 32'h20100000;  
+    #20         addr <= 9; wr <= 1; wdata <= 32'h21210000;
+    #20         addr <= 10;wr <= 1; wdata <= 32'h22320000;
+    #20         addr <= 11;wr <= 1; wdata <= 32'h23430000;
+    #20         addr <= 12;wr <= 1; wdata <= 32'h21430000;  
+    #20         addr <= 13;wr <= 1; wdata <= 32'h22430000;
+    #20         addr <= 14;wr <= 1; wdata <= 32'h20430000;
+    #20         addr <= 15;wr <= 1; wdata <= 32'h23430000;
+    #20         addr <= 16;wr <= 1; wdata <= 32'h20340000;
+    #20         addr <= 17;wr <= 1; wdata <= 32'h21430000;
+    #20         addr <= 18;wr <= 1; wdata <= 32'h23340000;
+    #20         addr <= 19;wr <= 1; wdata <= 32'h22430000;
     //Ex Task 1 added 
-    #20         addr <= 8; wr <= 1; wdata <= 32'h20010000;
+    /*#20         addr <= 8; wr <= 1; wdata <= 32'h20010000;
     #20         addr <= 9; wr <= 1; wdata <= 32'h11000000;
     #20         addr <= 10;wr <= 1; wdata <= 32'h11000000;
     #20         addr <= 11;wr <= 1; wdata <= 32'h21230000;
@@ -281,7 +303,7 @@ initial begin
     #20         addr <= 14;wr <= 1; wdata <= 32'h22450000;
     #20         addr <= 15;wr <= 1; wdata <= 32'h11000000;
     #20         addr <= 16;wr <= 1; wdata <= 32'h12000000;
-    #20         addr <= 17;wr <= 1; wdata <= 32'h23670000;
+    #20         addr <= 17;wr <= 1; wdata <= 32'h23670000;*/
 
     //EX Task 1 simple bench
     /*#20         addr <= 8; wr <= 1; wdata <= 32'h20010000;
