@@ -26,14 +26,19 @@ output[2:0]     cc
 //output[3:0]     rB,
 //output[15:0]    valC
 );
-parameter IRMOV = 8'h10;
-parameter HALT  = 8'h11;
-parameter NOP   = 8'h12;
-parameter ADD   = 8'h20;
-parameter SUB   = 8'h21;
-parameter AND   = 8'h22;
-parameter XOR   = 8'h23;
-parameter RRMOV = 8'h30;
+parameter IRMOV  = 8'h10;
+parameter HALT   = 8'h11;
+parameter NOP    = 8'h12;
+parameter ADD    = 8'h20;
+parameter SUB    = 8'h21;
+parameter AND    = 8'h22;
+parameter XOR    = 8'h23;
+parameter RRMOV  = 8'h30;
+parameter CMOVLE = 8'h31;
+parameter CMOVE  = 8'h32;
+parameter CMOVNE = 8'h33;
+parameter CMOVGE = 8'h34;
+parameter CMOVG  = 8'h35;
 ram ram(
                 .clock(clock),
                 .addr(f_addr),
@@ -142,20 +147,47 @@ always @(posedge clock) begin
             D_halt  <= d_halt;
         end
         else begin
-            if ({d_icode, d_ifun} == NOP) begin
+            /*if ({d_icode, d_ifun} == NOP) begin
                 {D_icode, D_ifun} <= AND;//NOP = AND R0, R0
             end
             else begin 
                 D_icode <= d_icode;
                 D_ifun  <= d_ifun;
-            end
-            //RRMOV
+            end*/
+            case({d_icode, d_ifun})
+                NOP: begin
+                    {D_icode, D_ifun} <= AND;
+                end
+                RRMOV: begin
+                    {D_icode, D_ifun} <= ADD;
+                end
+                CMOVLE: begin
+                    {D_icode, D_ifun} <= ADD;
+                end
+                default:begin
+                    D_icode <= d_icode;
+                    D_ifun  <= d_ifun;                    
+                end
+            endcase
+
             case({d_icode, d_ifun})
                 RRMOV:begin
                     D_valA  <= d_valA;
                     D_valB  <= 0;
                     D_rA    <= d_rB;
                     D_rB    <= d_rA; 
+                end
+                CMOVLE: begin
+                    D_valA  <= d_valA;
+                    D_valB  <= 0;
+                    if((e_SF^e_OF)|e_ZF)begin
+                        D_rA    <= d_rB;
+                        D_rB    <= d_rA; 
+                    end
+                    else begin
+                        D_rA    <= d_rA;
+                        D_rB    <= d_rB; 
+                    end
                 end
                 default:begin
                     D_valA  <= d_valA;
@@ -177,6 +209,9 @@ reg[3:0]          E_dstE = 4'bz;
 reg[31:0]         E_valE = 32'bz;
 reg               E_halt = 1'bz;
 reg[2:0]          E_cc   = 3'bz;
+wire              e_ZF;
+wire              e_SF;
+wire              e_OF;
 wire              e_halt = 1'bz;
 reg               e_reg_rst;
 wire[31:0]        e_valA = 32'bz;
@@ -196,10 +231,13 @@ assign            e_halt = D_halt;
 assign            e_dstE = D_rA;
 assign            e_alufun = 
                   ({D_icode, D_ifun} == ADD)   ? 0 :
-                  ({D_icode, D_ifun} == RRMOV) ? 0 :
+                  //({D_icode, D_ifun} == RRMOV) ? 0 :
                   ({D_icode, D_ifun} == SUB)   ? 1 :
                   ({D_icode, D_ifun} == AND)   ? 2 :
                   ({D_icode, D_ifun} == XOR)   ? 3 : 4'bz;
+assign            e_ZF = E_cc[2];
+assign            e_SF = E_cc[1];
+assign            e_OF = E_cc[0];
 always @(posedge clock) begin
     if ({D_icode, D_ifun} == IRMOV)begin
         E_dstM <= D_rB;
