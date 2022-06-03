@@ -268,7 +268,6 @@ reg[31:0]         E_valM = 32'bz;
 reg[3:0]          E_dstE = 4'bz;
 reg[31:0]         E_valE = 32'bz;
 reg               E_halt = 1'bz;
-reg[2:0]          E_cc   = 3'bz;
 wire              e_ZF;
 wire              e_SF;
 wire              e_OF;
@@ -295,9 +294,9 @@ assign            e_alufun =
                   ({D_icode, D_ifun} == SUB)   ? 1 :
                   ({D_icode, D_ifun} == AND)   ? 2 :
                   ({D_icode, D_ifun} == XOR)   ? 3 : 4'bz;
-assign            e_ZF = E_cc[2];
-assign            e_SF = E_cc[1];
-assign            e_OF = E_cc[0];
+assign            e_ZF = cc[2];
+assign            e_SF = cc[1];
+assign            e_OF = cc[0];
 always @(posedge clock) begin
     if ({D_icode, D_ifun} == IRMOV)begin
         E_dstM <= D_rB;
@@ -309,7 +308,6 @@ always @(posedge clock) begin
     end
     E_dstE <= e_dstE;
     E_valE <= e_valE;
-    E_cc   <= cc;
     E_halt <= e_halt;
 end
 
@@ -385,15 +383,17 @@ initial begin
     #20         addr <= 5; wr <= 1; wdata <= 32'h10F50085;
     #20         addr <= 6; wr <= 1; wdata <= 32'h10F60086;
     #20         addr <= 7; wr <= 1; wdata <= 32'h10F70087;
-
-    #20         addr <= 8; wr <= 1; wdata <= 32'h20100000;  
-    #20         addr <= 9; wr <= 1; wdata <= 32'h30120000;
-    #20         addr <= 10;wr <= 1; wdata <= 32'h22320000;
+    //CMOVLE = 8'h31; CMOVL  = 8'h32;
+    //CMOVE  = 8'h33; CMOVNE = 8'h34;
+    //CMOVGE = 8'h35; CMOVG  = 8'h36;
+    #20         addr <= 8; wr <= 1; wdata <= 32'h21430000;  
+    #20         addr <= 9; wr <= 1; wdata <= 32'h32120000;
+    /*#20         addr <= 10;wr <= 1; wdata <= 32'h22320000;
     #20         addr <= 11;wr <= 1; wdata <= 32'h23430000;
     #20         addr <= 12;wr <= 1; wdata <= 32'h30430000;  
     #20         addr <= 13;wr <= 1; wdata <= 32'h22430000;
     #20         addr <= 14;wr <= 1; wdata <= 32'h20430000;
-    #20         addr <= 15;wr <= 1; wdata <= 32'h23430000;
+    #20         addr <= 15;wr <= 1; wdata <= 32'h23430000;*/
 
     //Ex Task 2 added
     /*#20         addr <= 8; wr <= 1; wdata <= 32'h20100000;  
