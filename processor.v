@@ -35,10 +35,11 @@ parameter AND    = 8'h22;
 parameter XOR    = 8'h23;
 parameter RRMOV  = 8'h30;
 parameter CMOVLE = 8'h31;
-parameter CMOVE  = 8'h32;
-parameter CMOVNE = 8'h33;
-parameter CMOVGE = 8'h34;
-parameter CMOVG  = 8'h35;
+parameter CMOVL  = 8'h32;
+parameter CMOVE  = 8'h33;
+parameter CMOVNE = 8'h34;
+parameter CMOVGE = 8'h35;
+parameter CMOVG  = 8'h36;
 ram ram(
                 .clock(clock),
                 .addr(f_addr),
@@ -155,15 +156,14 @@ always @(posedge clock) begin
                 D_ifun  <= d_ifun;
             end*/
             case({d_icode, d_ifun})
-                NOP: begin
-                    {D_icode, D_ifun} <= AND;
-                end
-                RRMOV: begin
-                    {D_icode, D_ifun} <= ADD;
-                end
-                CMOVLE: begin
-                    {D_icode, D_ifun} <= ADD;
-                end
+                NOP:    begin {D_icode, D_ifun} <= AND; end
+                RRMOV:  begin {D_icode, D_ifun} <= ADD; end
+                CMOVLE: begin {D_icode, D_ifun} <= ADD; end
+                CMOVL:  begin {D_icode, D_ifun} <= ADD; end
+                CMOVE:  begin {D_icode, D_ifun} <= ADD; end
+                CMOVNE: begin {D_icode, D_ifun} <= ADD; end
+                CMOVGE: begin {D_icode, D_ifun} <= ADD; end
+                CMOVG:  begin {D_icode, D_ifun} <= ADD; end
                 default:begin
                     D_icode <= d_icode;
                     D_ifun  <= d_ifun;                    
@@ -189,7 +189,67 @@ always @(posedge clock) begin
                         D_rB    <= d_rB; 
                     end
                 end
-                default:begin
+                CMOVL: begin
+                    D_valA  <= d_valA;
+                    D_valB  <= 0;
+                    if(e_SF^e_OF)begin
+                        D_rA    <= d_rB;
+                        D_rB    <= d_rA; 
+                    end
+                    else begin
+                        D_rA    <= d_rA;
+                        D_rB    <= d_rB; 
+                    end
+                end
+                CMOVE: begin
+                    D_valA  <= d_valA;
+                    D_valB  <= 0;
+                    if(e_ZF)begin
+                        D_rA    <= d_rB;
+                        D_rB    <= d_rA; 
+                    end
+                    else begin
+                        D_rA    <= d_rA;
+                        D_rB    <= d_rB; 
+                    end
+                end
+                CMOVNE: begin
+                    D_valA  <= d_valA;
+                    D_valB  <= 0;
+                    if(~e_ZF)begin
+                        D_rA    <= d_rB;
+                        D_rB    <= d_rA; 
+                    end
+                    else begin
+                        D_rA    <= d_rA;
+                        D_rB    <= d_rB; 
+                    end                    
+                end
+                CMOVGE: begin
+                    D_valA  <= d_valA;
+                    D_valB  <= 0;
+                    if(~(e_SF^e_OF))begin
+                        D_rA    <= d_rB;
+                        D_rB    <= d_rA; 
+                    end
+                    else begin
+                        D_rA    <= d_rA;
+                        D_rB    <= d_rB; 
+                    end
+                end
+                CMOVG: begin
+                    D_valA  <= d_valA;
+                    D_valB  <= 0;
+                    if(~(e_SF^e_OF)&(~e_ZF))begin
+                        D_rA    <= d_rB;
+                        D_rB    <= d_rA; 
+                    end
+                    else begin
+                        D_rA    <= d_rA;
+                        D_rB    <= d_rB; 
+                    end                
+                end
+                default: begin
                     D_valA  <= d_valA;
                     D_valB  <= d_valB;
                     D_rA    <= d_rA;
@@ -336,8 +396,6 @@ initial begin
     #20         addr <= 15;wr <= 1; wdata <= 32'h23430000;
 
     //Ex Task 2 added
-    //ADD   = 8'h20;SUB   = 8'h21;
-    //AND   = 8'h22;XOR   = 8'h23;
     /*#20         addr <= 8; wr <= 1; wdata <= 32'h20100000;  
     #20         addr <= 9; wr <= 1; wdata <= 32'h21210000;
     #20         addr <= 10;wr <= 1; wdata <= 32'h22320000;
