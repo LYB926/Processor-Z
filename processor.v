@@ -2,7 +2,7 @@
 `timescale 1ns/10ps
 module processor(
 input           clock,
-input[31:0]      addr,
+input[31:0]     addr,
 input           wr,
 input[31:0]     wdata,
 input           working,
@@ -42,6 +42,11 @@ parameter CMOVGE = 8'h35;
 parameter CMOVG  = 8'h36;
 parameter JMP    = 8'h70;
 parameter JLE    = 8'h71;
+parameter JL     = 8'h72;
+parameter JE     = 8'h73;
+parameter JNE    = 8'h74;
+parameter JGE    = 8'h75;
+parameter JG     = 8'h76;
 ram ram(
                 .clock(clock),
                 .addr(f_addr),
@@ -154,7 +159,12 @@ assign          d_valB = (e_dstE == d_rB) ? e_valE :
                          (w_dstM == d_rB) ? w_valM : d_valB_reg;
 assign          d_halt = ({d_icode, d_ifun} == HALT) ? 1 : 0;
 assign          d_jflg = ({d_icode, d_ifun} == JMP&&working) ? 1 : 
-                         ({d_icode, d_ifun} == JLE&&working&&((e_SF^e_OF)|e_ZF)) ? 1 : 0;
+                         ({d_icode, d_ifun} == JLE&&working&&((e_SF^e_OF)|e_ZF)) ? 1 :
+                         ({d_icode, d_ifun} == JL &&working&&(e_SF^e_OF)) ? 1 : 
+                         ({d_icode, d_ifun} == JE &&working&&(e_ZF))  ? 1 : 
+                         ({d_icode, d_ifun} == JNE&&working&&(~e_ZF)) ? 1 :
+                         ({d_icode, d_ifun} == JGE&&working&&(~(e_SF^e_OF))) ? 1 :
+                         ({d_icode, d_ifun} == JG &&working&&(~(e_SF^e_OF)&(~e_ZF))) ? 1 : 0;
 assign          d_jpc  = {8'h0, d_rA, d_rB, d_valC};
 always @(posedge clock) begin
     if (working)begin
@@ -192,6 +202,11 @@ always @(posedge clock) begin
                 CMOVG:  begin {D_icode, D_ifun} <= ADD; end
                 JMP:    begin {D_icode, D_ifun} <= AND; end
                 JLE:    begin {D_icode, D_ifun} <= AND; end
+                JL :    begin {D_icode, D_ifun} <= AND; end
+                JE :    begin {D_icode, D_ifun} <= AND; end
+                JNE:    begin {D_icode, D_ifun} <= AND; end
+                JGE:    begin {D_icode, D_ifun} <= AND; end
+                JG :    begin {D_icode, D_ifun} <= AND; end
                 default:begin
                     D_icode <= d_icode;
                     D_ifun  <= d_ifun;                    
@@ -290,6 +305,21 @@ always @(posedge clock) begin
                 D_jflg <= 1;
             end
             else if({d_icode, d_ifun} == JLE&&((e_SF^e_OF)|e_ZF))begin
+                D_jflg <= 1;
+            end
+            else if({d_icode, d_ifun} == JL &&(e_SF^e_OF))begin
+                D_jflg <= 1;
+            end
+            else if({d_icode, d_ifun} == JE &&(e_ZF))begin
+                D_jflg <= 1;
+            end
+            else if({d_icode, d_ifun} == JNE&&(~e_ZF))begin
+                D_jflg <= 1;
+            end
+            else if({d_icode, d_ifun} == JGE&&(~(e_SF^e_OF)))begin
+                D_jflg <= 1;
+            end
+            else if({d_icode, d_ifun} == JG &&(~(e_SF^e_OF)&(~e_ZF)))begin
                 D_jflg <= 1;
             end
             else begin
@@ -424,8 +454,8 @@ initial begin
     #20         addr <= 5; wr <= 1; wdata <= 32'h10F50006;
     #20         addr <= 6; wr <= 1; wdata <= 32'h10F60007;
     #20         addr <= 7; wr <= 1; wdata <= 32'h10F70008;
-    #20         addr <= 8; wr <= 1; wdata <= 32'h21010000;  
-    #20         addr <= 9; wr <= 1; wdata <= 32'h7100000C; 
+    #20         addr <= 8; wr <= 1; wdata <= 32'h21210000;  
+    #20         addr <= 9; wr <= 1; wdata <= 32'h7600000C; 
     #20         addr <= 10;wr <= 1; wdata <= 32'h20760000;
     #20         addr <= 11;wr <= 1; wdata <= 32'h20100000;
     #20         addr <= 12;wr <= 1; wdata <= 32'h21700000;
