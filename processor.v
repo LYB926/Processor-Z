@@ -41,6 +41,7 @@ parameter CMOVNE = 8'h34;
 parameter CMOVGE = 8'h35;
 parameter CMOVG  = 8'h36;
 parameter JMP    = 8'h70;
+parameter JLE    = 8'h71;
 ram ram(
                 .clock(clock),
                 .addr(f_addr),
@@ -138,8 +139,8 @@ assign          d_ifun  = F_read[27:24];
 assign          d_rA    = F_read[23:20];
 assign          d_rB    = F_read[19:16];
 assign          d_valC  = F_read[15: 0];*/
-assign          {d_icode, d_ifun} = D_jflg ? NOP : F_read[31:24];
-assign          {d_rA, d_rB}      = D_jflg ? 8'b0:F_read[23:16];
+assign          {d_icode, d_ifun} = D_jflg ? NOP  : F_read[31:24];
+assign          {d_rA, d_rB}      = D_jflg ? 8'b0 : F_read[23:16];
 assign          d_valC  = F_read[15: 0];
 
 //Determine valA and valB with forwarding:
@@ -152,9 +153,8 @@ assign          d_valB = (e_dstE == d_rB) ? e_valE :
                          (w_dstE == d_rB) ? w_valE :
                          (w_dstM == d_rB) ? w_valM : d_valB_reg;
 assign          d_halt = ({d_icode, d_ifun} == HALT) ? 1 : 0;
-//assign          d_jflg = (F_read[31:24] == JMP)  ? 1 : 0;
-//assign          d_jpc  = F_read[23:0];
-assign          d_jflg = ({d_icode, d_ifun} == JMP&&working) ? 1 : 0;
+assign          d_jflg = ({d_icode, d_ifun} == JMP&&working) ? 1 : 
+                         ({d_icode, d_ifun} == JLE&&working&&((e_SF^e_OF)|e_ZF)) ? 1 : 0;
 assign          d_jpc  = {8'h0, d_rA, d_rB, d_valC};
 always @(posedge clock) begin
     if (working)begin
@@ -190,7 +190,8 @@ always @(posedge clock) begin
                 CMOVNE: begin {D_icode, D_ifun} <= ADD; end
                 CMOVGE: begin {D_icode, D_ifun} <= ADD; end
                 CMOVG:  begin {D_icode, D_ifun} <= ADD; end
-                JMP:    begin {D_icode, D_ifun} <= AND; end 
+                JMP:    begin {D_icode, D_ifun} <= AND; end
+                JLE:    begin {D_icode, D_ifun} <= AND; end
                 default:begin
                     D_icode <= d_icode;
                     D_ifun  <= d_ifun;                    
@@ -286,6 +287,9 @@ always @(posedge clock) begin
             D_valC <= d_valC;
             D_halt <= d_halt;
             if ({d_icode, d_ifun} == JMP) begin
+                D_jflg <= 1;
+            end
+            else if({d_icode, d_ifun} == JLE&&((e_SF^e_OF)|e_ZF))begin
                 D_jflg <= 1;
             end
             else begin
@@ -420,11 +424,17 @@ initial begin
     #20         addr <= 5; wr <= 1; wdata <= 32'h10F50006;
     #20         addr <= 6; wr <= 1; wdata <= 32'h10F60007;
     #20         addr <= 7; wr <= 1; wdata <= 32'h10F70008;
+    #20         addr <= 8; wr <= 1; wdata <= 32'h21010000;  
+    #20         addr <= 9; wr <= 1; wdata <= 32'h7100000C; 
+    #20         addr <= 10;wr <= 1; wdata <= 32'h20760000;
+    #20         addr <= 11;wr <= 1; wdata <= 32'h20100000;
+    #20         addr <= 12;wr <= 1; wdata <= 32'h21700000;
+    /*
     #20         addr <= 8; wr <= 1; wdata <= 32'h7000000B;   
     #20         addr <= 9; wr <= 1; wdata <= 32'h21760000;
     #20         addr <= 10;wr <= 1; wdata <= 32'h20760000;
     #20         addr <= 11;wr <= 1; wdata <= 32'h20100000;
-    #20         addr <= 12;wr <= 1; wdata <= 32'h21700000;
+    #20         addr <= 12;wr <= 1; wdata <= 32'h21700000;*/
 
     #20         addr <= 0; wr <= 0; wdata <= 0;
     #10         working <= 1;
