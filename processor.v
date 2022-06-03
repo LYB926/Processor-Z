@@ -100,18 +100,18 @@ always @(posedge clock) begin
 end
 
 //------Decode stage signals-----//
-wire[3:0]        d_icode = 4'bz;
-wire[3:0]        d_ifun  = 4'bz;
-wire[3:0]        d_rA    = 4'bz;
-wire[3:0]        d_rB    = 4'bz;
-wire[15:0]       d_valC  = 16'bz;
+wire[3:0]       d_icode = 4'bz;
+wire[3:0]       d_ifun  = 4'bz;
+wire[3:0]       d_rA    = 4'bz;
+wire[3:0]       d_rB    = 4'bz;
+wire[15:0]      d_valC  = 16'bz;
 wire[31:0]      d_valA  = 32'bz;
 wire[31:0]      d_valB  = 32'bz;
 wire[31:0]      d_valA_reg  = 32'bz;
 wire[31:0]      d_valB_reg  = 32'bz;
 wire            d_halt;
-wire            d_jflg;
-wire[31:0]      d_jpc;     
+wire            d_jflg  = 1'bz;
+wire[31:0]      d_jpc   = 32'bz;     
 reg[3:0]        D_icode = 4'bz;
 reg[3:0]        D_ifun  = 4'bz;
 reg[3:0]        D_rA    = 4'bz;
@@ -120,6 +120,8 @@ reg[31:0]       D_valA  = 32'bz;
 reg[31:0]       D_valB  = 32'bz;
 reg[15:0]       D_valC  = 16'bz;
 reg             D_halt  = 1'bz;
+reg             D_jflg  = 1'b0;
+//reg[31:0]       D_jpc   = 32'bz;  
 //-------------Decode------------//
 //assign icode  = D_icode;
 //assign ifun   = D_ifun;
@@ -130,12 +132,16 @@ reg             D_halt  = 1'bz;
 //assign valB     = d_valB;
 //assign d_rA     = D_rA;
 //assign d_rB     = D_rB;
-
+/*
 assign          d_icode = F_read[31:28];
 assign          d_ifun  = F_read[27:24];
 assign          d_rA    = F_read[23:20];
-assign          d_rB    = F_read[19:16]; 
+assign          d_rB    = F_read[19:16];
+assign          d_valC  = F_read[15: 0];*/
+assign          {d_icode, d_ifun} = D_jflg ? NOP : F_read[31:24];
+assign          {d_rA, d_rB}      = D_jflg ? 8'b0:F_read[23:16];
 assign          d_valC  = F_read[15: 0];
+
 //Determine valA and valB with forwarding:
 assign          d_valA = (e_dstE == d_rA) ? e_valE :
                          (E_dstE == d_rA) ? E_valE :
@@ -148,7 +154,7 @@ assign          d_valB = (e_dstE == d_rB) ? e_valE :
 assign          d_halt = ({d_icode, d_ifun} == HALT) ? 1 : 0;
 //assign          d_jflg = (F_read[31:24] == JMP)  ? 1 : 0;
 //assign          d_jpc  = F_read[23:0];
-assign          d_jflg = ({d_icode, d_ifun} == JMP)  ? 1 : 0;
+assign          d_jflg = ({d_icode, d_ifun} == JMP&&working) ? 1 : 0;
 assign          d_jpc  = {8'h0, d_rA, d_rB, d_valC};
 always @(posedge clock) begin
     if (working)begin
@@ -184,11 +190,7 @@ always @(posedge clock) begin
                 CMOVNE: begin {D_icode, D_ifun} <= ADD; end
                 CMOVGE: begin {D_icode, D_ifun} <= ADD; end
                 CMOVG:  begin {D_icode, D_ifun} <= ADD; end
-                JMP:    begin
-                            D_icode <= d_icode;
-                            D_ifun  <= d_ifun; 
-                            //d_jpc   <= {8'h0, d_rA, d_rB, d_valC};
-                        end 
+                JMP:    begin {D_icode, D_ifun} <= AND; end 
                 default:begin
                     D_icode <= d_icode;
                     D_ifun  <= d_ifun;                    
@@ -281,8 +283,15 @@ always @(posedge clock) begin
                     D_rB    <= d_rB;                    
                 end
             endcase
-            D_valC  <= d_valC;
-            D_halt  <= d_halt;
+            D_valC <= d_valC;
+            D_halt <= d_halt;
+            if ({d_icode, d_ifun} == JMP) begin
+                D_jflg <= 1;
+            end
+            else begin
+                D_jflg <= 0;
+            end
+            //D_jpc  <= d_jpc;
         end
     end
 end
@@ -314,15 +323,15 @@ assign            e_valB = D_valB;
 assign            e_halt = D_halt;
 assign            e_dstE = D_rA;
 assign            e_alufun = 
-                  ({D_icode, D_ifun} == ADD)   ? 0 :
-                  ({D_icode, D_ifun} == SUB)   ? 1 :
-                  ({D_icode, D_ifun} == AND)   ? 2 :
-                  ({D_icode, D_ifun} == XOR)   ? 3 : 4'bz;
+                  ({D_icode, D_ifun} == ADD) ? 0 :
+                  ({D_icode, D_ifun} == SUB) ? 1 :
+                  ({D_icode, D_ifun} == AND) ? 2 :
+                  ({D_icode, D_ifun} == XOR) ? 3 : 4'bz;
 assign            e_ZF = cc[2];
 assign            e_SF = cc[1];
 assign            e_OF = cc[0];
 always @(posedge clock) begin
-    if ({D_icode, D_ifun} == IRMOV)begin
+    if ({D_icode, D_ifun} == IRMOV) begin
         E_dstM <= D_rB;
         E_valM <= D_valC;
     end
@@ -411,11 +420,9 @@ initial begin
     #20         addr <= 5; wr <= 1; wdata <= 32'h10F50006;
     #20         addr <= 6; wr <= 1; wdata <= 32'h10F60007;
     #20         addr <= 7; wr <= 1; wdata <= 32'h10F70008;
-    #20         addr <= 8; wr <= 1; wdata <= 32'h11000000;   
-    #20         addr <= 9; wr <= 1; wdata <= 32'h21120000;
-    #20         addr <= 10;wr <= 1; wdata <= 32'h20340000; 
-    //#20         addr <= 9; wr <= 1; wdata <= 32'h21760000;
-    //#20         addr <= 10;wr <= 1; wdata <= 32'h20760000;
+    #20         addr <= 8; wr <= 1; wdata <= 32'h7000000B;   
+    #20         addr <= 9; wr <= 1; wdata <= 32'h21760000;
+    #20         addr <= 10;wr <= 1; wdata <= 32'h20760000;
     #20         addr <= 11;wr <= 1; wdata <= 32'h20100000;
     #20         addr <= 12;wr <= 1; wdata <= 32'h21700000;
 
