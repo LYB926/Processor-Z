@@ -2,7 +2,7 @@
 `timescale 1ns/10ps
 module ram(
 input               clock,
-input[8:0]          addr,
+input[31:0]          addr,
 input               wr,
 input[31:0]         wdata,
 input               rd,
