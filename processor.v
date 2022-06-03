@@ -333,6 +333,173 @@ always @(posedge clock) begin
 end
 endmodule
 
+//-----Testbench of processor(EX Task 3)-----//
+module pro_tb4;
+reg             clock;
+reg[8:0]        addr;
+reg             wr;
+reg[31:0]       wdata;
+reg             working;
+reg[3:0]        rID;
+//wire[31:0]      valA, valB; 
+wire[31:0]      valE;
+wire[31:0]      r0, r1, r2, r3, r4, r5, r6, r7;
+wire[31:0]      rdata;
+reg             flg = 0;
+wire[2:0]       cc;
+//wire[3:0]       icode;
+//wire[3:0]       ifun;
+//wire[3:0]       rA;
+//wire[3:0]       rB;
+//wire[15:0]      valC;
+//wire[31:0]      valE;
+processor processor(
+                clock,
+                addr,
+                wr,
+                wdata,
+                working,
+                rID,
+                //icode,
+                //ifun,
+                //rA,
+                //rB,
+                //valC,
+                //valA,
+                //valB,
+                valE,
+                r0, r1, r2, r3, r4, r5, r6, r7,
+                rdata,
+                cc
+                //valE
+);
+initial begin
+    clock <= 0; addr <= 0; wr <= 0; wdata <= 0; working <= 0; rID <= 4'b1111;
+    //Bench Group 1
+    /*#20         addr <= 0; wr <= 1; wdata <= 32'h10F00080;
+    #20         addr <= 1; wr <= 1; wdata <= 32'h10F10081;
+    #20         addr <= 2; wr <= 1; wdata <= 32'h10F20082;
+    #20         addr <= 3; wr <= 1; wdata <= 32'h10F30083;
+    #20         addr <= 4; wr <= 1; wdata <= 32'h10F40084;
+    #20         addr <= 5; wr <= 1; wdata <= 32'h10F50085;
+    #20         addr <= 6; wr <= 1; wdata <= 32'h10F60086;
+    #20         addr <= 7; wr <= 1; wdata <= 32'h10F70087;
+    #20         addr <= 8; wr <= 1; wdata <= 32'h30010000;
+    #20         addr <= 9; wr <= 1; wdata <= 32'h21320000;
+    #20         addr <= 10;wr <= 1; wdata <= 32'h31450000;
+    #20         addr <= 11;wr <= 1; wdata <= 32'h21010000;
+    #20         addr <= 12;wr <= 1; wdata <= 32'h31450000;
+    #20         addr <= 13;wr <= 1; wdata <= 32'h21320000;
+    #20         addr <= 14;wr <= 1; wdata <= 32'h31670000;*/
+    
+    //Bench group 2
+    /*#20         addr <= 0; wr <= 1; wdata <= 32'h10F00088;
+    #20         addr <= 1; wr <= 1; wdata <= 32'h10F10089;
+    #20         addr <= 2; wr <= 1; wdata <= 32'h10F2008A;
+    #20         addr <= 3; wr <= 1; wdata <= 32'h10F3008B;
+    #20         addr <= 4; wr <= 1; wdata <= 32'h10F4008C;
+    #20         addr <= 5; wr <= 1; wdata <= 32'h10F5008D;
+    #20         addr <= 6; wr <= 1; wdata <= 32'h10F6008E;
+    #20         addr <= 7; wr <= 1; wdata <= 32'h10F7008F;
+    #20         addr <= 8; wr <= 1; wdata <= 32'h30010000;
+    #20         addr <= 9; wr <= 1; wdata <= 32'h21320000;
+    #20         addr <= 10;wr <= 1; wdata <= 32'h32450000;
+    #20         addr <= 11;wr <= 1; wdata <= 32'h21010000;
+    #20         addr <= 12;wr <= 1; wdata <= 32'h32450000;
+    #20         addr <= 13;wr <= 1; wdata <= 32'h21320000;
+    #20         addr <= 14;wr <= 1; wdata <= 32'h32670000;*/
+    
+    //Bench group 3
+    /*#20         addr <= 0; wr <= 1; wdata <= 32'h10F00090;
+    #20         addr <= 1; wr <= 1; wdata <= 32'h10F10091;
+    #20         addr <= 2; wr <= 1; wdata <= 32'h10F20092;
+    #20         addr <= 3; wr <= 1; wdata <= 32'h10F30093;
+    #20         addr <= 4; wr <= 1; wdata <= 32'h10F40094;
+    #20         addr <= 5; wr <= 1; wdata <= 32'h10F50095;
+    #20         addr <= 6; wr <= 1; wdata <= 32'h10F60096;
+    #20         addr <= 7; wr <= 1; wdata <= 32'h10F70097;
+    #20         addr <= 8; wr <= 1; wdata <= 32'h30010000;
+    #20         addr <= 9; wr <= 1; wdata <= 32'h21320000;
+    #20         addr <= 10;wr <= 1; wdata <= 32'h33450000;
+    #20         addr <= 11;wr <= 1; wdata <= 32'h21010000;
+    #20         addr <= 12;wr <= 1; wdata <= 32'h33450000;
+    #20         addr <= 13;wr <= 1; wdata <= 32'h21320000;
+    #20         addr <= 14;wr <= 1; wdata <= 32'h33670000;*/
+    //Bench group 4
+    //CMOVLE = 8'h31; CMOVL  = 8'h32;
+    //CMOVE  = 8'h33; CMOVNE = 8'h34;
+    //CMOVGE = 8'h35; CMOVG  = 8'h36;
+    /*#20         addr <= 0; wr <= 1; wdata <= 32'h10F00090;
+    #20         addr <= 1; wr <= 1; wdata <= 32'h10F10091;
+    #20         addr <= 2; wr <= 1; wdata <= 32'h10F20092;
+    #20         addr <= 3; wr <= 1; wdata <= 32'h10F30093;
+    #20         addr <= 4; wr <= 1; wdata <= 32'h10F40094;
+    #20         addr <= 5; wr <= 1; wdata <= 32'h10F50095;
+    #20         addr <= 6; wr <= 1; wdata <= 32'h10F60096;
+    #20         addr <= 7; wr <= 1; wdata <= 32'h10F70097;
+    #20         addr <= 8; wr <= 1; wdata <= 32'h30010000;
+    #20         addr <= 9; wr <= 1; wdata <= 32'h21320000;
+    #20         addr <= 10;wr <= 1; wdata <= 32'h34450000;
+    #20         addr <= 11;wr <= 1; wdata <= 32'h21010000;
+    #20         addr <= 12;wr <= 1; wdata <= 32'h34450000;
+    #20         addr <= 13;wr <= 1; wdata <= 32'h21320000;
+    #20         addr <= 14;wr <= 1; wdata <= 32'h34670000;*/
+    //Bench group 5
+    //CMOVLE = 8'h31; CMOVL  = 8'h32;
+    //CMOVE  = 8'h33; CMOVNE = 8'h34;
+    //CMOVGE = 8'h35; CMOVG  = 8'h36;
+    /*#20         addr <= 0; wr <= 1; wdata <= 32'h10F00090;
+    #20         addr <= 1; wr <= 1; wdata <= 32'h10F10091;
+    #20         addr <= 2; wr <= 1; wdata <= 32'h10F20092;
+    #20         addr <= 3; wr <= 1; wdata <= 32'h10F30093;
+    #20         addr <= 4; wr <= 1; wdata <= 32'h10F40094;
+    #20         addr <= 5; wr <= 1; wdata <= 32'h10F50095;
+    #20         addr <= 6; wr <= 1; wdata <= 32'h10F60096;
+    #20         addr <= 7; wr <= 1; wdata <= 32'h10F70097;
+    #20         addr <= 8; wr <= 1; wdata <= 32'h30010000;
+    #20         addr <= 9; wr <= 1; wdata <= 32'h21320000;
+    #20         addr <= 10;wr <= 1; wdata <= 32'h35450000;
+    #20         addr <= 11;wr <= 1; wdata <= 32'h21010000;
+    #20         addr <= 12;wr <= 1; wdata <= 32'h35450000;
+    #20         addr <= 13;wr <= 1; wdata <= 32'h21320000;
+    #20         addr <= 14;wr <= 1; wdata <= 32'h35670000;*/
+    //Bench group 6
+    //CMOVLE = 8'h31; CMOVL  = 8'h32;
+    //CMOVE  = 8'h33; CMOVNE = 8'h34;
+    //CMOVGE = 8'h35; CMOVG  = 8'h36;
+    #20         addr <= 0; wr <= 1; wdata <= 32'h10F00090;
+    #20         addr <= 1; wr <= 1; wdata <= 32'h10F10091;
+    #20         addr <= 2; wr <= 1; wdata <= 32'h10F20092;
+    #20         addr <= 3; wr <= 1; wdata <= 32'h10F30093;
+    #20         addr <= 4; wr <= 1; wdata <= 32'h10F40094;
+    #20         addr <= 5; wr <= 1; wdata <= 32'h10F50095;
+    #20         addr <= 6; wr <= 1; wdata <= 32'h10F60096;
+    #20         addr <= 7; wr <= 1; wdata <= 32'h10F70097;
+    #20         addr <= 8; wr <= 1; wdata <= 32'h30010000;
+    #20         addr <= 9; wr <= 1; wdata <= 32'h21320000;
+    #20         addr <= 10;wr <= 1; wdata <= 32'h36450000;
+    #20         addr <= 11;wr <= 1; wdata <= 32'h21010000;
+    #20         addr <= 12;wr <= 1; wdata <= 32'h36450000;
+    #20         addr <= 13;wr <= 1; wdata <= 32'h21320000;
+    #20         addr <= 14;wr <= 1; wdata <= 32'h36670000;
+
+    #20         addr <= 0; wr <= 0; wdata <= 0;
+    #10         working <= 1;
+    #560        working <= 0; flg <= 1;
+    #1000       $stop;
+end
+always #10 clock = ~clock;
+always @(posedge clock ) begin
+    if (flg)begin
+        rID <= rID + 1;
+    end
+end
+initial begin
+    $dumpfile("pro_tbe1.vcd");
+    $dumpvars();
+end
+endmodule
+/*
 //-----Testbench of processor(Task 5)-----//
 module pro_tb4;
 reg             clock;
@@ -386,52 +553,52 @@ initial begin
     //CMOVLE = 8'h31; CMOVL  = 8'h32;
     //CMOVE  = 8'h33; CMOVNE = 8'h34;
     //CMOVGE = 8'h35; CMOVG  = 8'h36;
-    #20         addr <= 8; wr <= 1; wdata <= 32'h21430000;  
-    #20         addr <= 9; wr <= 1; wdata <= 32'h32120000;
-    /*#20         addr <= 10;wr <= 1; wdata <= 32'h22320000;
-    #20         addr <= 11;wr <= 1; wdata <= 32'h23430000;
-    #20         addr <= 12;wr <= 1; wdata <= 32'h30430000;  
-    #20         addr <= 13;wr <= 1; wdata <= 32'h22430000;
-    #20         addr <= 14;wr <= 1; wdata <= 32'h20430000;
-    #20         addr <= 15;wr <= 1; wdata <= 32'h23430000;*/
+    //#20         addr <= 8; wr <= 1; wdata <= 32'h21430000;  
+    //#20         addr <= 9; wr <= 1; wdata <= 32'h32120000;
+    //#20         addr <= 10;wr <= 1; wdata <= 32'h22320000;
+    //#20         addr <= 11;wr <= 1; wdata <= 32'h23430000;
+    //#20         addr <= 12;wr <= 1; wdata <= 32'h30430000;  
+    //#20         addr <= 13;wr <= 1; wdata <= 32'h22430000;
+    //#20         addr <= 14;wr <= 1; wdata <= 32'h20430000;
+    //#20         addr <= 15;wr <= 1; wdata <= 32'h23430000;
 
     //Ex Task 2 added
-    /*#20         addr <= 8; wr <= 1; wdata <= 32'h20100000;  
-    #20         addr <= 9; wr <= 1; wdata <= 32'h21210000;
-    #20         addr <= 10;wr <= 1; wdata <= 32'h22320000;
-    #20         addr <= 11;wr <= 1; wdata <= 32'h23430000;
-    #20         addr <= 12;wr <= 1; wdata <= 32'h21430000;  
-    #20         addr <= 13;wr <= 1; wdata <= 32'h22430000;
-    #20         addr <= 14;wr <= 1; wdata <= 32'h20430000;
-    #20         addr <= 15;wr <= 1; wdata <= 32'h23430000;
-    #20         addr <= 16;wr <= 1; wdata <= 32'h20340000;
-    #20         addr <= 17;wr <= 1; wdata <= 32'h21430000;
-    #20         addr <= 18;wr <= 1; wdata <= 32'h23340000;
-    #20         addr <= 19;wr <= 1; wdata <= 32'h22430000;*/
+    //#20         addr <= 8; wr <= 1; wdata <= 32'h20100000;  
+    //#20         addr <= 9; wr <= 1; wdata <= 32'h21210000;
+    //#20         addr <= 10;wr <= 1; wdata <= 32'h22320000;
+    //#20         addr <= 11;wr <= 1; wdata <= 32'h23430000;
+    //#20         addr <= 12;wr <= 1; wdata <= 32'h21430000;  
+    //#20         addr <= 13;wr <= 1; wdata <= 32'h22430000;
+    //#20         addr <= 14;wr <= 1; wdata <= 32'h20430000;
+    //#20         addr <= 15;wr <= 1; wdata <= 32'h23430000;
+    //#20         addr <= 16;wr <= 1; wdata <= 32'h20340000;
+    //#20         addr <= 17;wr <= 1; wdata <= 32'h21430000;
+    //#20         addr <= 18;wr <= 1; wdata <= 32'h23340000;
+    //#20         addr <= 19;wr <= 1; wdata <= 32'h22430000;
     //Ex Task 1 added 
-    /*#20         addr <= 8; wr <= 1; wdata <= 32'h20010000;
-    #20         addr <= 9; wr <= 1; wdata <= 32'h11000000;
-    #20         addr <= 10;wr <= 1; wdata <= 32'h11000000;
-    #20         addr <= 11;wr <= 1; wdata <= 32'h21230000;
-    #20         addr <= 12;wr <= 1; wdata <= 32'h12000000;
-    #20         addr <= 13;wr <= 1; wdata <= 32'h12000000;
-    #20         addr <= 14;wr <= 1; wdata <= 32'h22450000;
-    #20         addr <= 15;wr <= 1; wdata <= 32'h11000000;
-    #20         addr <= 16;wr <= 1; wdata <= 32'h12000000;
-    #20         addr <= 17;wr <= 1; wdata <= 32'h23670000;*/
+    //#20         addr <= 8; wr <= 1; wdata <= 32'h20010000;
+    //#20         addr <= 9; wr <= 1; wdata <= 32'h11000000;
+    //#20         addr <= 10;wr <= 1; wdata <= 32'h11000000;
+    //#20         addr <= 11;wr <= 1; wdata <= 32'h21230000;
+    //#20         addr <= 12;wr <= 1; wdata <= 32'h12000000;
+    //#20         addr <= 13;wr <= 1; wdata <= 32'h12000000;
+    //#20         addr <= 14;wr <= 1; wdata <= 32'h22450000;
+    //#20         addr <= 15;wr <= 1; wdata <= 32'h11000000;
+    //#20         addr <= 16;wr <= 1; wdata <= 32'h12000000;
+    //#20         addr <= 17;wr <= 1; wdata <= 32'h23670000;
 
     //EX Task 1 simple bench
-    /*#20         addr <= 8; wr <= 1; wdata <= 32'h20010000;
-    #20         addr <= 9; wr <= 1; wdata <= 32'h21230000;
-    #20         addr <= 10;wr <= 1; wdata <= 32'h11000000;
-    #20         addr <= 11;wr <= 1; wdata <= 32'h22450000;
-    #20         addr <= 12;wr <= 1; wdata <= 32'h23670000;*/
-    /*#20         addr <= 8; wr <= 1; wdata <= 32'h20010000;
-    #20         addr <= 9; wr <= 1; wdata <= 32'h21230000;
-    #20         addr <= 10;wr <= 1; wdata <= 32'h11000000;
-    #20         addr <= 11;wr <= 1; wdata <= 32'h11000000;
-    #20         addr <= 12;wr <= 1; wdata <= 32'h22450000;
-    #20         addr <= 13;wr <= 1; wdata <= 32'h23670000;*/
+    //#20         addr <= 8; wr <= 1; wdata <= 32'h20010000;
+    //#20         addr <= 9; wr <= 1; wdata <= 32'h21230000;
+    //#20         addr <= 10;wr <= 1; wdata <= 32'h11000000;
+    //#20         addr <= 11;wr <= 1; wdata <= 32'h22450000;
+    //#20         addr <= 12;wr <= 1; wdata <= 32'h23670000;
+    //#20         addr <= 8; wr <= 1; wdata <= 32'h20010000;
+    //#20         addr <= 9; wr <= 1; wdata <= 32'h21230000;
+    //#20         addr <= 10;wr <= 1; wdata <= 32'h11000000;
+    //#20         addr <= 11;wr <= 1; wdata <= 32'h11000000;
+    //#20         addr <= 12;wr <= 1; wdata <= 32'h22450000;
+    //#20         addr <= 13;wr <= 1; wdata <= 32'h23670000;
 
     //Task 3 added
     //#20         addr <= 8; wr <= 1; wdata <= 32'h20010000;
@@ -464,7 +631,7 @@ initial begin
     $dumpvars();
 end
 endmodule
-
+*/
 /*
 //-----Testbench of processor-----//
 module pro_tb4;
