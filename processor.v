@@ -393,7 +393,7 @@ assign        w_dstE = E_dstE;
 assign        w_valE = E_valE;    
 endmodule
 
-
+/*
 //-----Testbench of processor(EX Task 4)-----//
 module pro_tb4;
 reg             clock;
@@ -476,4 +476,4 @@ initial begin
     $dumpfile("pro_tb.vcd");
     $dumpvars();
 end
-endmodule
+endmodule*/

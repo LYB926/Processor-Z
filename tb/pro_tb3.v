@@ -59,7 +59,7 @@ initial begin
 end
 always #10 clock = ~clock;
 initial begin
-    $dumpfile("pro_tb.vcd");
+    $dumpfile("pro_tb3.vcd");
     $dumpvars;
 end
 endmodule

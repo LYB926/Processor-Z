@@ -71,7 +71,7 @@ always @(posedge clock ) begin
     end
 end
 initial begin
-    $dumpfile("pro_tb.vcd");
+    $dumpfile("pro_tbex2.vcd");
     $dumpvars;
 end
 endmodule
