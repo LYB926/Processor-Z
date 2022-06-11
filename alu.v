@@ -8,7 +8,6 @@ output[2:0]         cc
 );
 
 wire                ZF, SF, OF;
-
 wire signed[31:0]   A, B, E;
 assign              A = aluA;
 assign              B = aluB;
@@ -16,16 +15,14 @@ assign              E = valE;
 assign              cc = {ZF, SF, OF};
 assign valE = (alufun == 0) ? (aluA + aluB) : 
               (alufun == 1) ? (aluA - aluB) :
-              //(alufun == 2) ? (aluA && aluB):
-              //(alufun == 3) ? ((!aluA)&&aluB)||(aluA&&(!aluB)) :
-              (alufun == 2) ? (aluA & aluB):
+              (alufun == 2) ? (aluA & aluB) :
               (alufun == 3) ? ((~aluA)&aluB)|(aluA&(~aluB)) :
               32'bz;
 
 //cc[2] = ZF, cc[1] = SF, cc[0] = OF.
-assign ZF = (valE == 0) ? 1'b1 : 1'b0;
-assign SF = (valE[31] == 1) ? 1'b1 : 1'b0;
-assign OF = (alufun == 1) ? 
+assign ZF = (valE == 0) ? 1'b1 : 1'b0;          //判断运算结果是否为0
+assign SF = (valE[31] == 1) ? 1'b1 : 1'b0;      //判断运算结果是否小于0
+assign OF = (alufun == 1) ?                     //分别考虑做减法和其他运算时的溢出
             ((((A > 0)&&(B < 0)&&(E <= 0))||((A < 0)&&(B > 0)&&(E >= 0))) ? 1 : 0) : 
              (((A < 0)&&(B < 0)&&(E >= 0))||((A >= 0)&&(B >= 0)&&(E < 0))) ? 1 : 0;
 

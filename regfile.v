@@ -21,6 +21,7 @@ output[31:0]        r6,
 output[31:0]        r7
 );
 reg[31:0]           r_r0, r_r1, r_r2, r_r3, r_r4, r_r5,r_r6, r_r7;
+// 使用组合电路的实现方式访问寄存器
 assign              valA = (rA == 0) ? r0 :
                            (rA == 1) ? r1 :
                            (rA == 2) ? r2 :
@@ -37,6 +38,7 @@ assign              valB = (rB == 0) ? r0 :
                            (rB == 5) ? r5 :
                            (rB == 6) ? r6 :
                            (rB == 7) ? r7 : 32'bz;
+// 直接读取寄存器的内容
 assign              r0   = r_r0;
 assign              r1   = r_r1;
 assign              r2   = r_r2;
@@ -46,13 +48,13 @@ assign              r5   = r_r5;
 assign              r6   = r_r6;
 assign              r7   = r_r7;
 always @(posedge clock or negedge reset) begin
-    if (reset)begin
+    if (reset)begin  //Reset有效，初始化寄存器
         //r_valA <= 0; r_valB <= 0;
         r_r0 <= 0; r_r1 <= 0; r_r2 <= 0; r_r3 <= 0; 
         r_r4 <= 0; r_r5 <= 0; r_r6 <= 0; r_r7 <= 0; 
     end
-    else begin
-        case(dstE)
+    else begin       //更新指定的寄存器值
+        case(dstE)      
             0: begin r_r0 <= valE; end
             1: begin r_r1 <= valE; end
             2: begin r_r2 <= valE; end

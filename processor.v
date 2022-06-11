@@ -26,6 +26,7 @@ output[2:0]     cc
 //output[3:0]     rB,
 //output[15:0]    valC
 );
+// 指定各指令的指令代码和功能代码
 parameter IRMOV  = 8'h10;
 parameter HALT   = 8'h11;
 parameter NOP    = 8'h12;
@@ -60,11 +61,11 @@ regfile regfile(
                 .valE(w_valE),
                 .dstM(w_dstM),
                 .valM(w_valM),
-                .rA(d_rA),
+                .rA(d_rA),         //将译码得到的rA和rB连接到寄存器文件进行取操作数
                 .rB(d_rB),
                 .reset(e_reg_rst),
                 .clock(clock),
-                .valA(d_valA_reg),
+                .valA(d_valA_reg), //使用d_valA_reg读取寄存器的值
                 .valB(d_valB_reg),
                 .r0(r0),
                 .r1(r1),
@@ -90,13 +91,13 @@ wire[31:0]      f_rdata;
 wire[31:0]      F_read;
 //------------Fetch--------------//
 assign f_addr = (working) ?  PC : addr;
-assign f_rd   = (working) ?  1  : 0;
+assign f_rd   = (working) ?  1  : 0;     //判断写入还是读取指令
 assign F_read = f_rdata;
 always @(posedge clock) begin
     if (working)begin
-        case(d_jflg)
-            0: begin PC <= PC + 1; end
-            1: begin PC <= d_jpc;  end
+        case(d_jflg)                     //更新PC时考察d_jflg是否有效
+            0: begin PC <= PC + 1; end   //d_jflg无效，正常进行PC+1
+            1: begin PC <= d_jpc;  end   //d_jflg有效，进行地址跳转
             default: begin
                 PC <= PC + 1;
             end
@@ -111,9 +112,9 @@ wire[3:0]       d_ifun  = 4'bz;
 wire[3:0]       d_rA    = 4'bz;
 wire[3:0]       d_rB    = 4'bz;
 wire[15:0]      d_valC  = 16'bz;
-wire[31:0]      d_valA  = 32'bz;
+wire[31:0]      d_valA  = 32'bz; // 操作数A和操作数B
 wire[31:0]      d_valB  = 32'bz;
-wire[31:0]      d_valA_reg  = 32'bz;
+wire[31:0]      d_valA_reg  = 32'bz; 
 wire[31:0]      d_valB_reg  = 32'bz;
 wire            d_halt;
 wire            d_jflg  = 1'bz;
@@ -144,10 +145,12 @@ assign          d_ifun  = F_read[27:24];
 assign          d_rA    = F_read[23:20];
 assign          d_rB    = F_read[19:16];
 assign          d_valC  = F_read[15: 0];*/
+// 从流水线寄存器中得到译码结果
+// 译码阶段读取流水线寄存器时检查D_jflg是否有效，有效则替换指令为NOP
 assign          {d_icode, d_ifun} = D_jflg ? NOP  : F_read[31:24];
 assign          {d_rA, d_rB}      = D_jflg ? 8'b0 : F_read[23:16];
 assign          d_valC  = F_read[15: 0];
-
+// 按照转发源的优先级进行条件判断和赋值，实现转发：
 assign          d_valA = (e_dstE == d_rA) ? e_valE :
                          (e_dstM == d_rA) ? e_valM :
                          (w_dstE == d_rA) ? w_valE :
@@ -156,7 +159,10 @@ assign          d_valB = (e_dstE == d_rB) ? e_valE :
                          (e_dstM == d_rB) ? e_valM :
                          (w_dstE == d_rB) ? w_valE :
                          (w_dstM == d_rB) ? w_valM : d_valB_reg;
+// 判断是否译码出HALT指令：
 assign          d_halt = ({d_icode, d_ifun} == HALT) ? 1 : 0;
+// 根据译码结果确定d_jflg是否有效并且计算跳转地址d_jpc，
+// 读取到JXX指令且满足条件时，d_jflg才有效：
 assign          d_jflg = ({d_icode, d_ifun} == JMP&&working) ? 1 : 
                          ({d_icode, d_ifun} == JLE&&working&&((e_SF^e_OF)|e_ZF)) ? 1 :
                          ({d_icode, d_ifun} == JL &&working&&(e_SF^e_OF)) ? 1 : 
@@ -167,17 +173,17 @@ assign          d_jflg = ({d_icode, d_ifun} == JMP&&working) ? 1 :
 assign          d_jpc  = {8'h0, d_rA, d_rB, d_valC};
 always @(posedge clock) begin
     if (working)begin  
-        if (d_halt) begin
+        if (d_halt) begin            //译码得到HALT指令的情况
             {D_icode, D_ifun} <={D_icode, D_ifun};
-            D_rA    <= 4'hF;
+            D_rA    <= 4'hF;         //将rA和rB设置为F，停止写回寄存器
             D_rB    <= 4'hF;
-            D_valC  <= D_valC;
+            D_valC  <= D_valC;       //停止更新译码阶段的流水线寄存器
             D_valA  <= D_valA;
             D_valB  <= D_valB;
             D_halt  <= d_halt;
         end
-        else begin
-            case({d_icode, d_ifun})
+        else begin                   //非HALT指令的情况
+            case({d_icode, d_ifun})  //对部分指令进行替换
                 NOP:    begin {D_icode, D_ifun} <= AND; end
                 RRMOV:  begin {D_icode, D_ifun} <= ADD; end
                 CMOVLE: begin {D_icode, D_ifun} <= ADD; end
@@ -199,22 +205,22 @@ always @(posedge clock) begin
                 end
             endcase
 
-            case({d_icode, d_ifun})
-                RRMOV:begin
+            case({d_icode, d_ifun})             //修改更新给流水线的操作数
+                RRMOV:begin                     //若为RRMOV，更新D_valA为0    
                     D_valA  <= 0;
                     D_valB  <= d_valB;
                     D_rA    <= d_rA;
                     D_rB    <= d_rB; 
                 end
-                CMOVLE: begin
+                CMOVLE: begin   
                     D_valA  <= 0;
                     D_valB  <= d_valB;
                     D_rB    <= d_rB; 
-                    if((e_SF^e_OF)|e_ZF)begin
-                        D_rA    <= d_rA;
+                    if((e_SF^e_OF)|e_ZF)begin    //检查条件是否满足
+                        D_rA    <= d_rA;         //条件满足，写入到rA
                     end
                     else begin
-                        D_rA    <= d_rB;
+                        D_rA    <= d_rB;         //条件不满足，写回到rB，相当于NOP
                     end
                 end
                 CMOVL: begin
@@ -281,6 +287,8 @@ always @(posedge clock) begin
             endcase
             D_valC <= d_valC;
             D_halt <= d_halt;
+
+            //更新D_jflg的值到下一个周期：
             if ({d_icode, d_ifun} == JMP) begin
                 D_jflg <= 1;
             end
@@ -326,9 +334,9 @@ wire[31:0]        e_valM = 32'bz;
 wire[31:0]        e_valA = 32'bz;
 wire[31:0]        e_valB = 32'bz;
 wire[3:0]         e_alufun = 4'bz;
-wire[31:0]        e_valE = 32'bz;
+wire[31:0]        e_valE = 32'bz; //用于保存运算结果和写回寄存器地址
 wire[3:0]         e_dstE = 4'bz;
-initial begin
+initial begin     //使用initial语句生成寄存器清零信号
         e_reg_rst <= 1;
     #20 e_reg_rst <= 0;
 end
@@ -338,16 +346,19 @@ assign            e_valA = D_valA;
 assign            e_valB = D_valB;
 assign            e_valM = D_valC;
 assign            e_halt = D_halt;
-assign            e_dstE = D_rA;
+assign            e_dstE = D_rA;   //新增：指令执行结果保存到rA
+// 从译码阶段的流水线寄存器读取数据，当指令为IRMOV时写入地址dstM才有效
 assign            e_dstM = ({D_icode, D_ifun}==IRMOV) ? D_rB : 4'hF;
-assign            e_alufun = 
+assign            e_alufun =  //确定功能代码
                   ({D_icode, D_ifun} == ADD) ? 0 :
                   ({D_icode, D_ifun} == SUB) ? 1 :
                   ({D_icode, D_ifun} == AND) ? 2 :
                   ({D_icode, D_ifun} == XOR) ? 3 : 4'bz;
+// 读取来自ALU的条件码
 assign            e_ZF = cc[2];
 assign            e_SF = cc[1];
 assign            e_OF = cc[0];
+// 每个时钟上升沿更新执行阶段的流水线寄存器
 always @(posedge clock) begin
     if ({D_icode, D_ifun} == IRMOV) begin
         E_dstM <= e_dstM;
