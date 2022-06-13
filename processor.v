@@ -88,11 +88,12 @@ reg[31:0]       PC = 0;
 wire[31:0]      f_addr;
 wire            f_rd;
 wire[31:0]      f_rdata;
-wire[31:0]      F_read;
+//wire[31:0]      F_read;
+reg[31:0]       F_read;
 //------------Fetch--------------//
 assign f_addr = (working) ?  PC : addr;
 assign f_rd   = (working) ?  1  : 0;     //判断写入还是读取指令
-assign F_read = f_rdata;
+//assign F_read = f_rdata;
 always @(posedge clock) begin
     if (working)begin
         case(d_jflg)                     //更新PC时考察d_jflg是否有效
@@ -102,8 +103,8 @@ always @(posedge clock) begin
                 PC <= PC + 1;
             end
         endcase
-        
     end
+    F_read <= f_rdata;
 end
 
 //------Decode stage signals-----//
