@@ -45,7 +45,8 @@ initial begin
     #20         addr <= 2; wdata <= 32'h21230000;
     #20         addr <= 3; wdata <= 32'h22450000;
     #20         addr <= 4; wdata <= 32'h23670000;
-    #20         addr <= 0; wdata <= 32'h00000000; wr <= 0; working <= 1;
+    #20         addr <= 0; wdata <= 32'h00000000; wr <= 0; 
+    #10         working <= 1;
     #150        $stop;
 end
 always #10 clock = ~clock;
